@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "664557863168",
+    "project_id": "cotransforma-6db81",
+    "storage_bucket": "cotransforma-6db81.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:664557863168:android:3429e73f7173a92a6533e5",
+        "android_client_info": {
+          "package_name": "com.DefaultCompany.COTRANSFORMA"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "664557863168-vnt7hu3paa0catriauk9id0smtm0s6jf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARndz_zcehIoimYxYUYKRW-CZklG_RdR0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "664557863168-vnt7hu3paa0catriauk9id0smtm0s6jf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
