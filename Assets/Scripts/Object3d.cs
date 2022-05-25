@@ -36,7 +36,6 @@ public class Object3d : MonoBehaviour
         inputx4.text = "0";
         inputy4.text = "0";
         inputz4.text = "0";
-
         inputw1.text = "0";
         inputw2.text = "0";
         inputw3.text = "0";
@@ -57,18 +56,18 @@ public class Object3d : MonoBehaviour
         z2 = float.Parse(inputz2.text);
         z3 = float.Parse(inputz3.text);
 
-        x4 = float.Parse(inputx2.text);
-        y4 = float.Parse(inputx3.text);
-        z4 = float.Parse(inputx3.text);
-        w1 = float.Parse(inputx1.text);
-        w2 = float.Parse(inputx2.text);
-        w3 = float.Parse(inputx3.text);
-        w4 = float.Parse(inputx1.text);
+        x4 = float.Parse(inputx4.text);
+        y4 = float.Parse(inputy4.text);
+        z4 = float.Parse(inputz4.text);
+        w1 = float.Parse(inputw1.text);
+        w2 = float.Parse(inputw2.text);
+        w3 = float.Parse(inputw3.text);
+        w4 = float.Parse(inputw4.text);
 
-        column0 = new Vector4(x1, x2, x3, x4);
-        column1 = new Vector4(y1, y2, y3, y4);
-        column2 = new Vector4(z1, z2, z3, z4);
-        column3 = new Vector4(w1, w2, w3, w4);
+        column0 = new Vector4(x1, y1, z1, w1);
+        column1 = new Vector4(x2, y2, z2, w2);
+        column2 = new Vector4(x3, y3, z3, w3);
+        column3 = new Vector4(x4, y4, z4, w4);
 
         matrix = new Matrix4x4(column0, column1, column2, column3);
 

@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 4205378}
   - component: {fileID: 4205376}
   m_Layer: 5
-  m_Name: InputField 15
+  m_Name: InputField 14
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -237,7 +237,7 @@ RectTransform:
   - {fileID: 139415749}
   - {fileID: 1007467311}
   m_Father: {fileID: 693403511}
-  m_RootOrder: 14
+  m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -375,7 +375,7 @@ GameObject:
   - component: {fileID: 32380545}
   - component: {fileID: 32380543}
   m_Layer: 5
-  m_Name: InputField 14
+  m_Name: InputField 13
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -476,7 +476,7 @@ RectTransform:
   - {fileID: 718901073}
   - {fileID: 1482818456}
   m_Father: {fileID: 693403511}
-  m_RootOrder: 13
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -2593,10 +2593,10 @@ RectTransform:
   - {fileID: 1821297244}
   - {fileID: 1301916693}
   - {fileID: 1402200677}
-  - {fileID: 772102652}
   - {fileID: 32380544}
   - {fileID: 4205377}
   - {fileID: 1233942528}
+  - {fileID: 772102652}
   m_Father: {fileID: 1404744857}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2808,7 +2808,7 @@ GameObject:
   - component: {fileID: 772102653}
   - component: {fileID: 772102651}
   m_Layer: 5
-  m_Name: InputField 13
+  m_Name: InputField 16
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2909,7 +2909,7 @@ RectTransform:
   - {fileID: 7789746}
   - {fileID: 1714655249}
   m_Father: {fileID: 693403511}
-  m_RootOrder: 12
+  m_RootOrder: 15
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -3708,7 +3708,7 @@ GameObject:
   - component: {fileID: 1233942529}
   - component: {fileID: 1233942527}
   m_Layer: 5
-  m_Name: InputField 16
+  m_Name: InputField 15
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3809,7 +3809,7 @@ RectTransform:
   - {fileID: 1453088123}
   - {fileID: 1108336632}
   m_Father: {fileID: 693403511}
-  m_RootOrder: 15
+  m_RootOrder: 14
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -4587,10 +4587,10 @@ MonoBehaviour:
   inputx4: {fileID: 1677671356}
   inputy4: {fileID: 1497788045}
   inputz4: {fileID: 1402200678}
-  inputw1: {fileID: 772102651}
-  inputw2: {fileID: 32380543}
-  inputw3: {fileID: 4205376}
-  inputw4: {fileID: 1233942527}
+  inputw1: {fileID: 32380543}
+  inputw2: {fileID: 4205376}
+  inputw3: {fileID: 1233942527}
+  inputw4: {fileID: 772102651}
   textboxScale: {fileID: 619381522}
   textboxRotate: {fileID: 730006389}
   textboxPosition: {fileID: 607624083}
