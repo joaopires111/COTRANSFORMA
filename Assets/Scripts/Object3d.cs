@@ -8,12 +8,17 @@ using Firebase.Extensions;
 
 public class Object3d : MonoBehaviour
 {
-    float x1, y1, z1, x2, y2, z2, x3, y3, z3;
+    private float x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, w1, w2, w3, w4;
 
     public InputField inputx1, inputy1, inputz1, inputx2, inputy2, inputz2, inputx3, inputy3, inputz3;
-    public Matrix4x4 matrix;
-    public Vector4 column0, column1, column2, column3;
-    MatrixFirebase readDB;
+    public InputField inputx4, inputy4, inputz4, inputw1, inputw2, inputw3, inputw4;
+    public TextMeshProUGUI textboxScale, textboxRotate, textboxPosition;
+
+    private Matrix4x4 matrix;
+    private Vector4 column0, column1, column2, column3;
+    private MatrixFirebase readDB;
+    private Vector3 scale, position;
+    private Quaternion rotate;
 
     // Start is called before the first frame update
     void Start()
@@ -27,6 +32,15 @@ public class Object3d : MonoBehaviour
         inputx3.text = "0";
         inputy3.text = "0";
         inputz3.text = "1";
+
+        inputx4.text = "0";
+        inputy4.text = "0";
+        inputz4.text = "0";
+
+        inputw1.text = "0";
+        inputw2.text = "0";
+        inputw3.text = "0";
+        inputw4.text = "1";
     }
 
     // Update is called once per frame
@@ -43,16 +57,30 @@ public class Object3d : MonoBehaviour
         z2 = float.Parse(inputz2.text);
         z3 = float.Parse(inputz3.text);
 
-        column0 = new Vector4(x1, y1, z1, 0);
-        column1 = new Vector4(x2, y2, z2, 0);
-        column2 = new Vector4(x3, y3, z3, 0);
-        column3 = new Vector4(0, 0, 0, 1);
+        x4 = float.Parse(inputx2.text);
+        y4 = float.Parse(inputx3.text);
+        z4 = float.Parse(inputx3.text);
+        w1 = float.Parse(inputx1.text);
+        w2 = float.Parse(inputx2.text);
+        w3 = float.Parse(inputx3.text);
+        w4 = float.Parse(inputx1.text);
+
+        column0 = new Vector4(x1, x2, x3, x4);
+        column1 = new Vector4(y1, y2, y3, y4);
+        column2 = new Vector4(z1, z2, z3, z4);
+        column3 = new Vector4(w1, w2, w3, w4);
 
         matrix = new Matrix4x4(column0, column1, column2, column3);
 
-        transform.localScale = matrix.ExtractScale();
-        transform.rotation = matrix.ExtractRotation();
-        transform.position = matrix.ExtractPosition();
+        transform.localScale = scale = matrix.ExtractScale();
+        transform.rotation = rotate = matrix.ExtractRotation();
+        transform.position = position = matrix.ExtractPosition();
+
+        textboxScale.text = "Scale " + scale.ToString();
+        textboxPosition.text = "Position " + position.ToString();
+        textboxRotate.text = "Rotate " + rotate.ToString();
+
+
 
     }
 
