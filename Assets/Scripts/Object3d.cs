@@ -12,7 +12,13 @@ public class Object3d : MonoBehaviour
 
     public InputField inputx1, inputy1, inputz1, inputx2, inputy2, inputz2, inputx3, inputy3, inputz3;
     public InputField inputx4, inputy4, inputz4, inputw1, inputw2, inputw3, inputw4;
-    public TextMeshProUGUI textboxScale, textboxRotate, textboxPosition;
+    
+    public InputField Valores;
+    public TextMeshProUGUI textboxValores;
+
+    public Button ButtonScale, ButtonTranslate, ButtonRotateX, ButtonRotateY, ButtonRotateZ;
+
+
 
     private Matrix4x4 matrix;
     private Vector4 column0, column1, column2, column3;
@@ -75,9 +81,9 @@ public class Object3d : MonoBehaviour
         transform.rotation = rotate = matrix.ExtractRotation();
         transform.position = position = matrix.ExtractPosition();
 
-        textboxScale.text = "Scale " + scale.ToString();
-        textboxPosition.text = "Position " + position.ToString();
-        textboxRotate.text = "Rotate " + rotate.ToString();
+        textboxValores.text = "Scale " + scale.ToString();
+        textboxValores.text = "Position " + position.ToString();
+        textboxValores.text = "Rotate " + rotate.ToString();
 
 
 
