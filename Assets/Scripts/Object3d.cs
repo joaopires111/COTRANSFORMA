@@ -15,11 +15,10 @@ public class Object3d : MonoBehaviour
     
     public InputField Valores;
     public TextMeshProUGUI textboxValores;
+    public Button ButtonScale;
+    public Toggle  ButtonTranslate, ButtonRotateX, ButtonRotateY, ButtonRotateZ;
 
-    public Button ButtonScale, ButtonTranslate, ButtonRotateX, ButtonRotateY, ButtonRotateZ;
-
-
-
+    private ArrayList PilhaMatriz;
     private Matrix4x4 matrix;
     private Vector4 column0, column1, column2, column3;
     private MatrixFirebase readDB;
@@ -29,6 +28,7 @@ public class Object3d : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        PilhaMatriz = new ArrayList();
         inputx1.text = "1";
         inputy1.text = "0";
         inputz1.text = "0";
@@ -46,6 +46,7 @@ public class Object3d : MonoBehaviour
         inputw2.text = "0";
         inputw3.text = "0";
         inputw4.text = "1";
+        deactivateMatriz();
     }
 
     // Update is called once per frame
@@ -53,6 +54,71 @@ public class Object3d : MonoBehaviour
     {
 
     }
+
+    private void deactivateMatriz()
+    {
+        inputx1.interactable = false;
+        inputy1.interactable = false;
+        inputz1.interactable = false;
+        inputx2.interactable = false;
+        inputy2.interactable = false;
+        inputz2.interactable = false;
+        inputx3.interactable = false;
+        inputy3.interactable = false;
+        inputz3.interactable = false;
+
+        inputx4.interactable = false;
+        inputy4.interactable = false;
+        inputz4.interactable = false;
+        inputw1.interactable = false;
+        inputw2.interactable = false;
+        inputw3.interactable = false;
+        inputw4.interactable = false;
+    }
+
+    public void ButtonScaleaActive()
+    {
+        deactivateMatriz();
+        inputx1.interactable = true;
+        inputy2.interactable = true;
+        inputz3.interactable = true;
+    }
+
+    public void ButtonTranslateActive()
+    {
+        deactivateMatriz();
+        inputx4.interactable = true;
+        inputy4.interactable = true;
+        inputz4.interactable = true;
+    }
+    public void ButtonRotateXActive()
+    {
+        deactivateMatriz();
+        inputy2.interactable = true;
+        inputy3.interactable = true;
+        inputz2.interactable = true;
+        inputz3.interactable = true;
+    }
+    public void ButtonRotateYActive()
+    {
+        deactivateMatriz();
+        inputx1.interactable = true;
+        inputx3.interactable = true;
+        inputz1.interactable = true;
+        inputz3.interactable = true;
+    }
+    public void ButtonRotateZActive()
+    {
+        deactivateMatriz();
+        inputx1.interactable = true;
+        inputx2.interactable = true;
+        inputy1.interactable = true;
+        inputy2.interactable = true;
+    }
+
+
+
+
 
     public void aplicarModoFacil()
     {
@@ -74,8 +140,7 @@ public class Object3d : MonoBehaviour
 
     public void aplicarTransform()
     {
-        
-
+        Matrix4x4 matrixfinal;
 
         x1 = float.Parse(inputx1.text);
         x2 = float.Parse(inputx2.text);
@@ -100,11 +165,23 @@ public class Object3d : MonoBehaviour
         column2 = new Vector4(x3, y3, z3, w3);
         column3 = new Vector4(x4, y4, z4, w4);
 
+
+
         matrix = new Matrix4x4(column0, column1, column2, column3);
 
-        transform.localScale = scale = matrix.ExtractScale();
-        transform.rotation = rotate = matrix.ExtractRotation();
-        transform.position = position = matrix.ExtractPosition();
+        matrixfinal = matrix;
+
+        PilhaMatriz.Add(matrix);
+
+        foreach (Matrix4x4 matrix1 in PilhaMatriz)
+        {
+            matrixfinal *= matrix1;
+        }
+
+
+        transform.localScale = scale = matrixfinal.ExtractScale();
+        transform.rotation = rotate = matrixfinal.ExtractRotation();
+        transform.position = position = matrixfinal.ExtractPosition();
 
 
 
