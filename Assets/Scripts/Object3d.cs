@@ -52,9 +52,34 @@ public class Object3d : MonoBehaviour
     void Update()
     {
 
+    }
+
+    public void aplicarModoFacil()
+    {
+        float rotacaoX = float.Parse(Valores.text) * (Mathf.PI / 180);      
+
+        y2 = Mathf.Cos(rotacaoX);
+        y3 = Mathf.Sin(rotacaoX);
+        z2 = Mathf.Sin(rotacaoX);
+        z3 = Mathf.Cos(rotacaoX);
+
+        inputy2.text = y2.ToString();
+        inputy3.text = y3.ToString();
+        inputz2.text = z2.ToString();
+        inputz3.text = z3.ToString();
+
+        Valores.text = rotacaoX.ToString();
+    }
+
+
+    public void aplicarTransform()
+    {
+        
+
+
         x1 = float.Parse(inputx1.text);
         x2 = float.Parse(inputx2.text);
-        x3 = float.Parse(inputx3.text);  
+        x3 = float.Parse(inputx3.text);
         y1 = float.Parse(inputy1.text);
         y2 = float.Parse(inputy2.text);
         y3 = float.Parse(inputy3.text);
@@ -81,12 +106,13 @@ public class Object3d : MonoBehaviour
         transform.rotation = rotate = matrix.ExtractRotation();
         transform.position = position = matrix.ExtractPosition();
 
-        textboxValores.text = "Scale " + scale.ToString();
-        textboxValores.text = "Position " + position.ToString();
-        textboxValores.text = "Rotate " + rotate.ToString();
 
 
+        textboxValores.text = "Rotate X";
+        //Valores.text = rotate.x.ToString();
 
+        /*textboxValores.text = "Position " + position.ToString();
+        textboxValores.text = "Rotate " + rotate.ToString();*/
     }
 
     public void writeFirebase()
