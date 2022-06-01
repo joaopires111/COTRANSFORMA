@@ -4,5 +4,20 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Menu_IniciarSessao_Registo.unity
+    guid: a9536befa8377754597abc5e1b4397db
+  - enabled: 1
+    path: Assets/Scenes/IniciarSessao.unity
+    guid: 5d3d0f7149bf9e249b3f59f232c58e3f
+  - enabled: 1
+    path: Assets/Scenes/Registar.unity
+    guid: 9c2adb2e5c471384e9c092cbf3274968
+  - enabled: 1
+    path: Assets/Scenes/SampleScene.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Scenes/MenuJogo.unity
+    guid: 586ea6b6ef5495041b1b07c745f3399f
   m_configObjects: {}
