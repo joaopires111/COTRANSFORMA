@@ -9,26 +9,32 @@ using Firebase.Extensions;
 public class Object3d : MonoBehaviour
 {
     private float x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, w1, w2, w3, w4;
+    public float countdown;
     private string eixo;
+    private bool startanimation = false;
 
     public InputField inputx1, inputy1, inputz1, inputx2, inputy2, inputz2, inputx3, inputy3, inputz3;
     public InputField inputx4, inputy4, inputz4, inputw1, inputw2, inputw3, inputw4;
-    
+
     public InputField Valores;
     public TextMeshProUGUI textboxValores;
     public Button ButtonScale;
-    public Toggle  ButtonTranslate, ButtonRotateX, ButtonRotateY, ButtonRotateZ;
+    public Toggle ButtonTranslate, ButtonRotateX, ButtonRotateY, ButtonRotateZ;
 
     private ArrayList PilhaMatriz;
     private Matrix4x4 matrixfinal;
     private Vector4 column0, column1, column2, column3;
     private MatrixFirebase readDB;
-    private Vector3 scale, position;
-    private Quaternion rotate;
+    private Vector3 scale, position, scaleDividido, positionDividido;
+    private Quaternion rotate, rotateDividido;
 
     // Start is called before the first frame update
     void Start()
     {
+        countdown = 1.0f;
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 30;
+
         PilhaMatriz = new ArrayList();
         resetmatriz();
         deactivateMatriz();
@@ -58,6 +64,35 @@ public class Object3d : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (startanimation == true)
+        {
+            countdown -= Time.deltaTime;
+
+            if (countdown >= 0.0f)
+            {
+                
+
+                transform.localScale += scaleDividido;
+                transform.localRotation.Set(rotateDividido.x, rotateDividido.y, rotateDividido.z, rotateDividido.w);
+                transform.localPosition += positionDividido;
+                rotateDividido.x += rotateDividido.x;
+
+
+                Debug.Log("Rotate" + rotateDividido.x);
+            }
+            else
+            {
+                transform.localScale = scale;
+                transform.localRotation = rotate;
+                transform.localPosition = position;
+
+                startanimation = false;
+                countdown = 1.0f;
+                Debug.Log("aumentar scale por" + transform.localPosition);
+            }
+        }
+
+
 
     }
 
@@ -132,18 +167,19 @@ public class Object3d : MonoBehaviour
     public void aplicarModoFacil()
     {
 
-        if(eixo == "x") { 
-        float rotacaoX = float.Parse(Valores.text) * Mathf.Deg2Rad;
+        if (eixo == "x")
+        {
+            float rotacaoX = float.Parse(Valores.text) * Mathf.Deg2Rad;
 
-        y2 = Mathf.Round(Mathf.Cos(rotacaoX) * 1000f) / 1000f;
-        z3 = Mathf.Round(Mathf.Cos(rotacaoX) * 1000f) / 1000f;
-        y3 = Mathf.Round(Mathf.Sin(rotacaoX) * 1000f) / 1000f;   
-        z2 = - Mathf.Round(Mathf.Sin(rotacaoX) * 1000f) / 1000f;
+            y2 = Mathf.Round(Mathf.Cos(rotacaoX) * 1000f) / 1000f;
+            z3 = Mathf.Round(Mathf.Cos(rotacaoX) * 1000f) / 1000f;
+            y3 = Mathf.Round(Mathf.Sin(rotacaoX) * 1000f) / 1000f;
+            z2 = -Mathf.Round(Mathf.Sin(rotacaoX) * 1000f) / 1000f;
 
-        inputy2.text = y2.ToString();
-        inputy3.text = y3.ToString();
-        inputz2.text = z2.ToString();
-        inputz3.text = z3.ToString();
+            inputy2.text = y2.ToString();
+            inputy3.text = y3.ToString();
+            inputz2.text = z2.ToString();
+            inputz3.text = z3.ToString();
         }
 
         if (eixo == "y")
@@ -215,22 +251,37 @@ public class Object3d : MonoBehaviour
         {
             matrixfinal = matrix;
         }
-        else { 
+        else
+        {
             matrixfinal *= matrix;
         }
 
+        scale = matrixfinal.ExtractScale();
+        rotate = matrixfinal.ExtractRotation();
+        position = matrixfinal.ExtractPosition();
 
-        transform.localScale = scale = matrixfinal.ExtractScale();
-        transform.rotation = rotate = matrixfinal.ExtractRotation();
-        transform.position = position = matrixfinal.ExtractPosition();
+
+        //diferença entre a transformação atual do objeto e a transformação da matriz final dividida pelo framerate
+        //escala
+        scaleDividido = (scale - transform.localScale) / 30;
+        //rotação (tem de ser feito individualmente devido a ser um quartenion)
+        rotateDividido.x = ((rotate.x - transform.localRotation.x) / 30);
+        rotateDividido.y = (rotate.y - transform.localRotation.y) / 30;
+        rotateDividido.z = (rotate.z - transform.localRotation.z) / 30;
+        rotateDividido.w = (rotate.w - transform.localRotation.w) / 30;
+        Debug.Log(rotateDividido.w);
+        //posição
+        positionDividido = (position - transform.localPosition) / 30;
+        
+
 
         //Valores.text = rotate.x.ToString();
-
         /*textboxValores.text = "Position " + position.ToString();
         textboxValores.text = "Rotate " + rotate.ToString();*/
 
 
         resetmatriz();
+        startanimation = true;
     }
 
     public void writeFirebase()
@@ -246,7 +297,8 @@ public class Object3d : MonoBehaviour
         FirebaseDatabase.DefaultInstance
         .RootReference
         .Child("matrix")
-        .GetValueAsync().ContinueWithOnMainThread(task => {
+        .GetValueAsync().ContinueWithOnMainThread(task =>
+        {
             if (task.IsFaulted)
             {
                 // Handle the error...
@@ -271,7 +323,7 @@ public class Object3d : MonoBehaviour
 
 }
 
- 
+
 public static class MatrixExtensions
 {
     public static Quaternion ExtractRotation(this Matrix4x4 matrix)
@@ -312,7 +364,7 @@ public class MatrixFirebase
 {
     public float x1, y1, z1, x2, y2, z2, x3, y3, z3;
 
-    public MatrixFirebase(float x1,float y1,float z1, float x2, float y2, float z2, float x3, float y3, float z3)
+    public MatrixFirebase(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3)
     {
         this.x1 = x1;
         this.y1 = y1;
