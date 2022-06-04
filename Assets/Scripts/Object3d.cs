@@ -9,6 +9,7 @@ using Firebase.Extensions;
 public class Object3d : MonoBehaviour
 {
     private float x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, w1, w2, w3, w4;
+    private string eixo;
 
     public InputField inputx1, inputy1, inputz1, inputx2, inputy2, inputz2, inputx3, inputy3, inputz3;
     public InputField inputx4, inputy4, inputz4, inputw1, inputw2, inputw3, inputw4;
@@ -19,7 +20,7 @@ public class Object3d : MonoBehaviour
     public Toggle  ButtonTranslate, ButtonRotateX, ButtonRotateY, ButtonRotateZ;
 
     private ArrayList PilhaMatriz;
-    private Matrix4x4 matrix;
+    private Matrix4x4 matrixfinal;
     private Vector4 column0, column1, column2, column3;
     private MatrixFirebase readDB;
     private Vector3 scale, position;
@@ -29,6 +30,12 @@ public class Object3d : MonoBehaviour
     void Start()
     {
         PilhaMatriz = new ArrayList();
+        resetmatriz();
+        deactivateMatriz();
+    }
+
+    private void resetmatriz()
+    {
         inputx1.text = "1";
         inputy1.text = "0";
         inputz1.text = "0";
@@ -46,7 +53,6 @@ public class Object3d : MonoBehaviour
         inputw2.text = "0";
         inputw3.text = "0";
         inputw4.text = "1";
-        deactivateMatriz();
     }
 
     // Update is called once per frame
@@ -75,7 +81,6 @@ public class Object3d : MonoBehaviour
         inputw3.interactable = false;
         inputw4.interactable = false;
     }
-
     public void ButtonScaleaActive()
     {
         deactivateMatriz();
@@ -83,7 +88,6 @@ public class Object3d : MonoBehaviour
         inputy2.interactable = true;
         inputz3.interactable = true;
     }
-
     public void ButtonTranslateActive()
     {
         deactivateMatriz();
@@ -98,6 +102,9 @@ public class Object3d : MonoBehaviour
         inputy3.interactable = true;
         inputz2.interactable = true;
         inputz3.interactable = true;
+        textboxValores.text = "Rotate X";
+        eixo = "x";
+
     }
     public void ButtonRotateYActive()
     {
@@ -106,6 +113,7 @@ public class Object3d : MonoBehaviour
         inputx3.interactable = true;
         inputz1.interactable = true;
         inputz3.interactable = true;
+        eixo = "y";
     }
     public void ButtonRotateZActive()
     {
@@ -114,6 +122,7 @@ public class Object3d : MonoBehaviour
         inputx2.interactable = true;
         inputy1.interactable = true;
         inputy2.interactable = true;
+        eixo = "z";
     }
 
 
@@ -122,25 +131,58 @@ public class Object3d : MonoBehaviour
 
     public void aplicarModoFacil()
     {
-        float rotacaoX = float.Parse(Valores.text) * (Mathf.PI / 180);      
 
-        y2 = Mathf.Cos(rotacaoX);
-        y3 = Mathf.Sin(rotacaoX);
-        z2 = Mathf.Sin(rotacaoX);
-        z3 = Mathf.Cos(rotacaoX);
+        if(eixo == "x") { 
+        float rotacaoX = float.Parse(Valores.text) * Mathf.Deg2Rad;
+
+        y2 = Mathf.Round(Mathf.Cos(rotacaoX) * 1000f) / 1000f;
+        z3 = Mathf.Round(Mathf.Cos(rotacaoX) * 1000f) / 1000f;
+        y3 = Mathf.Round(Mathf.Sin(rotacaoX) * 1000f) / 1000f;   
+        z2 = - Mathf.Round(Mathf.Sin(rotacaoX) * 1000f) / 1000f;
 
         inputy2.text = y2.ToString();
         inputy3.text = y3.ToString();
         inputz2.text = z2.ToString();
         inputz3.text = z3.ToString();
+        }
 
-        Valores.text = rotacaoX.ToString();
+        if (eixo == "y")
+        {
+            float rotacaoX = float.Parse(Valores.text) * Mathf.Deg2Rad * Mathf.Deg2Rad;
+
+            y2 = Mathf.Cos(rotacaoX);
+            y3 = Mathf.Sin(rotacaoX);
+            z2 = -Mathf.Sin(rotacaoX);
+            z3 = Mathf.Cos(rotacaoX);
+
+            inputy2.text = y2.ToString();
+            inputy3.text = y3.ToString();
+            inputz2.text = z2.ToString();
+            inputz3.text = z3.ToString();
+        }
+
+        if (eixo == "z")
+        {
+            float rotacaoX = float.Parse(Valores.text) * Mathf.Deg2Rad * Mathf.Deg2Rad;
+
+            y2 = Mathf.Cos(rotacaoX);
+            y3 = Mathf.Sin(rotacaoX);
+            z2 = -Mathf.Sin(rotacaoX);
+            z3 = Mathf.Cos(rotacaoX);
+
+            inputy2.text = y2.ToString();
+            inputy3.text = y3.ToString();
+            inputz2.text = z2.ToString();
+            inputz3.text = z3.ToString();
+        }
+
+
     }
 
 
     public void aplicarTransform()
     {
-        Matrix4x4 matrixfinal;
+        Matrix4x4 matrix;
 
         x1 = float.Parse(inputx1.text);
         x2 = float.Parse(inputx2.text);
@@ -165,17 +207,16 @@ public class Object3d : MonoBehaviour
         column2 = new Vector4(x3, y3, z3, w3);
         column3 = new Vector4(x4, y4, z4, w4);
 
-
-
         matrix = new Matrix4x4(column0, column1, column2, column3);
-
-        matrixfinal = matrix;
 
         PilhaMatriz.Add(matrix);
 
-        foreach (Matrix4x4 matrix1 in PilhaMatriz)
+        if (PilhaMatriz.Count == 1)
         {
-            matrixfinal *= matrix1;
+            matrixfinal = matrix;
+        }
+        else { 
+            matrixfinal *= matrix;
         }
 
 
@@ -183,13 +224,13 @@ public class Object3d : MonoBehaviour
         transform.rotation = rotate = matrixfinal.ExtractRotation();
         transform.position = position = matrixfinal.ExtractPosition();
 
-
-
-        textboxValores.text = "Rotate X";
         //Valores.text = rotate.x.ToString();
 
         /*textboxValores.text = "Position " + position.ToString();
         textboxValores.text = "Rotate " + rotate.ToString();*/
+
+
+        resetmatriz();
     }
 
     public void writeFirebase()
