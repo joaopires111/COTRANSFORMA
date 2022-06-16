@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class ManagerBotoes : MonoBehaviour
 {
+    public static string Jog;
     public void Btn_Sair()
     {
         Application.Quit();
@@ -48,5 +49,20 @@ public class ManagerBotoes : MonoBehaviour
     public void VoltarMenu(string inicio)
     {
         SceneManager.LoadScene(inicio);
+    }
+
+    public void jog1(string jog1)
+    {
+        Jog = "jog1";
+
+        SceneManager.LoadScene(jog1);
+    }
+    public void jog2(string jog2)
+    {
+        Jog = "jog2";
+        
+        PlayerPrefs.SetString("jogador", "Jog2");
+
+        SceneManager.LoadScene(jog2);
     }
 }
