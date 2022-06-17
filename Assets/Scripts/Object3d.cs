@@ -26,13 +26,15 @@ public class Object3d : MonoBehaviour
     public Button ButtonScale, ButtonTranslate, ButtonRotateX, ButtonRotateY, ButtonRotateZ, ButtonEnviar, ButtonAplicarTransform;
     public GameObject CuboProposto;
 
+    private float angulo, angulodividido;
+    private Vector3 axis;
     private ArrayList PilhaMatriz;
     private Matrix4x4 matrixfinal;
     public Matrix4x4 localToWorldMatrix;
     private Vector4 column0, column1, column2, column3;
     private MatrixFirebase readDB;
-    private Vector3 scale, position, scale2, position2, scaleDividido, positionDividido, rotateDividido;
-    private Quaternion rotate, rotate2;
+    private Vector3 scale, position, scale2, position2, scaleDividido, positionDividido, scaleant, posant;
+    private Quaternion rotateant, rotate2;
     private bool modoadivinha;
 
     // Start is called before the first frame update
@@ -49,6 +51,7 @@ public class Object3d : MonoBehaviour
         countdown2 = 3.0f;
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 30;
+        
 
         PilhaMatriz = new ArrayList();
         resetmatriz();
@@ -114,13 +117,13 @@ public class Object3d : MonoBehaviour
 
                 if (Jog == "jog2" && sala.matrixjog1[sala.Ronda] != Matrix4x4.zero && sala.proporjog1[sala.Ronda])
                 {
-                    aplicarTransformCuboProposto(sala.matrixjog1[sala.Ronda]);
+                    aplicarTransformCuboProposto(sala.matrixjog1[sala.Ronda], sala.rotacaojog1[sala.Ronda]);
                     esperar = false;
                 }
 
                 if (Jog == "jog1" && sala.matrixjog2[sala.Ronda] != Matrix4x4.zero && sala.proporjog2[sala.Ronda])
                 {
-                    aplicarTransformCuboProposto(sala.matrixjog2[sala.Ronda]);
+                    aplicarTransformCuboProposto(sala.matrixjog2[sala.Ronda], sala.rotacaojog2[sala.Ronda]);
                     esperar = false;
                 }
 
@@ -136,22 +139,25 @@ public class Object3d : MonoBehaviour
                 if (countdown >= 0.0f)
                 {
 
-
+                    if (angulo == 0) { 
                     transform.localScale += scaleDividido;
-                    transform.localEulerAngles += rotateDividido;
-                    //Debug.Log("rotate dividido" + rotateDividido);
-                    //Debug.Log(transform.localEulerAngles);
-                    transform.position += positionDividido;
+                    }
+                    transform.RotateAround(Vector3.zero, axis, angulodividido);
+                    transform.Translate(positionDividido, Space.World);
+
 
 
                 }
                 else
                 {
-                    transform.localScale = scale;
-                    transform.rotation = rotate;
-                    transform.position = position;
+                    //transform.localScale = scale;
+                    //transform.RotateAround(Vector3.zero, axis, angulo);
+                    //transform.Translate(position, Space.World);
 
 
+
+
+                    angulo = 0;
 
                     startanimation = false;
                     countdown = 1.0f;
@@ -337,6 +343,8 @@ public class Object3d : MonoBehaviour
     {
         float rotacao = float.Parse(Valores.text) * Mathf.Deg2Rad;
 
+        angulo = float.Parse(Valores.text);
+
         if (eixo == "x")
         {
             y2 = Mathf.Round(Mathf.Cos(rotacao) * 1000f) / 1000f;
@@ -348,6 +356,9 @@ public class Object3d : MonoBehaviour
             inputy3.text = y3.ToString();
             inputz2.text = z2.ToString();
             inputz3.text = z3.ToString();
+
+            axis = Vector3.right;
+           
         }
 
         if (eixo == "y")
@@ -362,6 +373,8 @@ public class Object3d : MonoBehaviour
             inputx3.text = x3.ToString();
             inputz1.text = z1.ToString();
             inputz3.text = z3.ToString();
+
+            axis = Vector3.up;
         }
 
         if (eixo == "z")
@@ -376,20 +389,23 @@ public class Object3d : MonoBehaviour
             inputx2.text = x2.ToString();
             inputy1.text = y1.ToString();
             inputy2.text = y2.ToString();
+
+            axis = Vector3.forward;
+
         }
 
 
     }
 
-    public void aplicarTransformCuboProposto(Matrix4x4 matriz)
+    public void aplicarTransformCuboProposto(Matrix4x4 matriz, Vector3 rotacaojog)
     {
         position2 = matriz.ExtractPosition();
         scale2 = matriz.ExtractScale();
-        rotate2 = matriz.ExtractRotation();
+        //rotate2 = matriz.ExtractRotation();
 
         CuboProposto.transform.localPosition = position2;
         CuboProposto.transform.localScale = scale2;
-        CuboProposto.transform.localRotation = rotate2;
+        CuboProposto.transform.eulerAngles = rotacaojog;
 
         Pilha.text = "Responda ao jogador1";
         activateButtons();
@@ -445,8 +461,6 @@ public class Object3d : MonoBehaviour
 
         matrixfinal = (Matrix4x4)PilhaMatriz[0];
 
-        matrixfinal = transform.worldToLocalMatrix * matrixfinal;
-
 
 
         if (PilhaMatriz.Count > 1)
@@ -458,17 +472,19 @@ public class Object3d : MonoBehaviour
         }
 
         scale = matrixfinal.ExtractScale();
-        rotate = matrixfinal.ExtractRotation();
-        position = matrixfinal.ExtractPosition();
+        position = matrix.ExtractPosition();
+        //rotate = matrixfinal.ExtractRotation();
 
 
         //diferença entre a transformação atual do objeto e a transformação da matriz final dividida pelo framerate
         //escala
         scaleDividido = (scale - transform.localScale) / 30;
         //rotação (conversão de quartenion para eulerangle (vector3))
-        rotateDividido = (rotate.eulerAngles - transform.localEulerAngles) / 30;
+        //rotateDividido = (rotate.eulerAngles - transform.localEulerAngles) / 30;
+        angulodividido = angulo / 30;
+
         //posição
-        positionDividido = (position - transform.localPosition) / 30;
+        positionDividido = position / 30;
 
 
 
@@ -491,10 +507,12 @@ public class Object3d : MonoBehaviour
             if (Jog == "jog1")
             {
                 sala.matrixjog1[sala.Ronda] = matrixfinal;
+                sala.rotacaojog1[sala.Ronda] = transform.eulerAngles;
             }
             else
             {
                 sala.matrixjog2[sala.Ronda] = matrixfinal;
+                sala.rotacaojog2[sala.Ronda] = transform.eulerAngles;
             }
             string json = JsonUtility.ToJson(sala);
             DatabaseReference reference = FirebaseDatabase.DefaultInstance.RootReference;
@@ -663,6 +681,9 @@ public class Sala
     public int CodigoSala = 0000;
     public int Ronda;
 
+    public Vector3[] rotacaojog1;
+    public Vector3[] rotacaojog2;
+
     public Matrix4x4[] matrixjog1;
     public bool[] proporjog1;
 
@@ -672,6 +693,8 @@ public class Sala
 
     public Sala()
     {
+        rotacaojog2 = new Vector3[10];
+        rotacaojog2 = new Vector3[10];
 
         Ronda = 0;
         CodigoSala = 0;
