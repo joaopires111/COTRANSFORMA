@@ -37,9 +37,18 @@ public class Object3d : MonoBehaviour
     private Quaternion rotateant, rotate2;
     private bool modoadivinha;
 
+    public TextMeshProUGUI Tempo;
+
+    public float timeValue = 301;
+    public int pontuacao;
+    public TextMeshProUGUI pontuacaoText;
+
+
+
     // Start is called before the first frame update
     void Start()
     {
+
         esperar = false;
         sala = new Sala();
         sala.Ronda = 0;
@@ -51,7 +60,7 @@ public class Object3d : MonoBehaviour
         countdown2 = 3.0f;
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 30;
-        
+
 
         PilhaMatriz = new ArrayList();
         resetmatriz();
@@ -104,6 +113,26 @@ public class Object3d : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        if (pontuacao < 0)
+        {
+            Color newColor = new Color(1f, 0f, 0f, 1);
+
+            pontuacaoText.color = newColor;
+        }
+
+        if (timeValue > 0)
+        {
+            timeValue -= Time.deltaTime;
+        }
+        else
+        {
+            timeValue = 0;
+        }
+
+        DisplayTime(timeValue);
+
+
         if (esperar == true)
         {
             countdown2 -= Time.deltaTime;
@@ -168,6 +197,27 @@ public class Object3d : MonoBehaviour
         }
 
     }
+
+    void DisplayTime(float timeToDisplay)
+    {
+        if (timeToDisplay < 0)
+        {
+            timeToDisplay = 0;
+        }
+
+        float minutes = Mathf.FloorToInt(timeToDisplay / 60);
+        float seconds = Mathf.FloorToInt(timeToDisplay % 60);
+
+        if (minutes == 0 && seconds <= 10)
+        {
+            Color newColor = new Color(0.69f, 0f, 0f, 1f);
+            Tempo.color = newColor;
+        }
+
+        Tempo.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+
+    }
+
     private void deactivateButtons()
     {
         ButtonScale.interactable = false;
@@ -211,7 +261,6 @@ public class Object3d : MonoBehaviour
 
         Valores.interactable = false;
     }
-
     public void ButtonScaleaActive()
     {
         deactivateMatriz();
@@ -234,6 +283,8 @@ public class Object3d : MonoBehaviour
         inputy2.colors = cb;
         inputz3.colors = cb;
     }
+
+
     public void ButtonTranslateActive()
     {
         deactivateMatriz();
@@ -362,7 +413,7 @@ public class Object3d : MonoBehaviour
             inputz3.text = z3.ToString();
 
             axis = Vector3.right;
-           
+
         }
 
         if (eixo == "y")
@@ -453,7 +504,7 @@ public class Object3d : MonoBehaviour
         w3 = float.Parse(inputw3.text);
         w4 = float.Parse(inputw4.text);
 
-        
+
         column0 = new Vector4(x1, y1, z1, w1);
         column1 = new Vector4(x2, y2, z2, w2);
         column2 = new Vector4(x3, y3, z3, w3);
@@ -462,7 +513,6 @@ public class Object3d : MonoBehaviour
         matrix = new Matrix4x4(column0, column1, column2, column3);
 
         PilhaMatriz.Add(matrix);
-
 
         matrixfinal = (Matrix4x4)PilhaMatriz[0];
 
@@ -500,12 +550,20 @@ public class Object3d : MonoBehaviour
 
         resetmatriz();
         startanimation = true;
+
+        pontuacaoText.text = "Pontua��o: " + pontuacao-- + " pontos";
+
+        if (pontuacao < 0)
+        {
+            ButtonAplicarTransform.interactable = false;
+
+        }
     }
 
     public void enviar()
     {
 
-        if(!modoadivinha)
+        if (!modoadivinha)
         {
             deactivateButtons();
             Pilha.text = "espere pela resposta";
