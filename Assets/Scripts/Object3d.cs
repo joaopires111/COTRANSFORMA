@@ -98,7 +98,7 @@ public class Object3d : MonoBehaviour
         inputw4.text = "1";
 
         Valores.interactable = false;
-        Valores.text = "";
+        Valores.text = "0";
     }
 
     // Update is called once per frame
@@ -139,12 +139,12 @@ public class Object3d : MonoBehaviour
                 if (countdown >= 0.0f)
                 {
 
-                    if (angulo == 0) { 
-                    transform.localScale += scaleDividido;
-                    }
+                    //if (angulo == 0) { 
+
+                    //}
                     transform.RotateAround(Vector3.zero, axis, angulodividido);
                     transform.Translate(positionDividido, Space.World);
-
+                    transform.localScale += scaleDividido;
 
 
                 }
@@ -211,9 +211,11 @@ public class Object3d : MonoBehaviour
 
         Valores.interactable = false;
     }
+
     public void ButtonScaleaActive()
     {
         deactivateMatriz();
+        resetmatriz();
         inputx1.interactable = true;
         inputy2.interactable = true;
         inputz3.interactable = true;
@@ -232,11 +234,10 @@ public class Object3d : MonoBehaviour
         inputy2.colors = cb;
         inputz3.colors = cb;
     }
-
-
     public void ButtonTranslateActive()
     {
         deactivateMatriz();
+        resetmatriz();
         inputx4.interactable = true;
         inputy4.interactable = true;
         inputz4.interactable = true;
@@ -258,6 +259,7 @@ public class Object3d : MonoBehaviour
     public void ButtonRotateXActive()
     {
         deactivateMatriz();
+        resetmatriz();
         Valores.interactable = true;
         inputy2.interactable = true;
         inputy3.interactable = true;
@@ -286,6 +288,7 @@ public class Object3d : MonoBehaviour
     {
 
         deactivateMatriz();
+        resetmatriz();
         Valores.interactable = true;
         inputx1.interactable = true;
         inputx3.interactable = true;
@@ -312,6 +315,7 @@ public class Object3d : MonoBehaviour
     {
 
         deactivateMatriz();
+        resetmatriz();
         Valores.interactable = true;
         inputx1.interactable = true;
         inputx2.interactable = true;
@@ -397,7 +401,7 @@ public class Object3d : MonoBehaviour
 
     }
 
-    public void aplicarTransformCuboProposto(Matrix4x4 matriz, Vector3 rotacaojog)
+    public void aplicarTransformCuboProposto(Matrix4x4 matriz, Quaternion rotacaojog)
     {
         position2 = matriz.ExtractPosition();
         scale2 = matriz.ExtractScale();
@@ -405,7 +409,7 @@ public class Object3d : MonoBehaviour
 
         CuboProposto.transform.localPosition = position2;
         CuboProposto.transform.localScale = scale2;
-        CuboProposto.transform.eulerAngles = rotacaojog;
+        CuboProposto.transform.rotation = rotacaojog;
 
         Pilha.text = "Responda ao jogador1";
         activateButtons();
@@ -459,6 +463,7 @@ public class Object3d : MonoBehaviour
 
         PilhaMatriz.Add(matrix);
 
+
         matrixfinal = (Matrix4x4)PilhaMatriz[0];
 
 
@@ -507,12 +512,14 @@ public class Object3d : MonoBehaviour
             if (Jog == "jog1")
             {
                 sala.matrixjog1[sala.Ronda] = matrixfinal;
-                sala.rotacaojog1[sala.Ronda] = transform.eulerAngles;
+                sala.rotacaojog1[sala.Ronda] = transform.rotation;
+                sala.Transformjog1[sala.Ronda] = transform;
             }
             else
             {
                 sala.matrixjog2[sala.Ronda] = matrixfinal;
-                sala.rotacaojog2[sala.Ronda] = transform.eulerAngles;
+                sala.rotacaojog2[sala.Ronda] = transform.rotation;
+                sala.Transformjog2[sala.Ronda] = transform;
             }
             string json = JsonUtility.ToJson(sala);
             DatabaseReference reference = FirebaseDatabase.DefaultInstance.RootReference;
@@ -681,8 +688,8 @@ public class Sala
     public int CodigoSala = 0000;
     public int Ronda;
 
-    public Vector3[] rotacaojog1;
-    public Vector3[] rotacaojog2;
+    public Quaternion[] rotacaojog1;
+    public Quaternion[] rotacaojog2;
 
     public Matrix4x4[] matrixjog1;
     public bool[] proporjog1;
@@ -690,11 +697,13 @@ public class Sala
     public Matrix4x4[] matrixjog2;
     public bool[] proporjog2;
 
-
+    public Transform[] Transformjog1, Transformjog2;
     public Sala()
     {
-        rotacaojog2 = new Vector3[10];
-        rotacaojog2 = new Vector3[10];
+
+
+        rotacaojog1 = new Quaternion[10];
+        rotacaojog2 = new Quaternion[10];
 
         Ronda = 0;
         CodigoSala = 0;
@@ -705,6 +714,8 @@ public class Sala
         matrixjog2 = new Matrix4x4[10];
         proporjog2 = new bool[10];
 
+        Transformjog1 = new Transform[10];
+        Transformjog2 = new Transform[10];
     }
 }
 public class jogador
