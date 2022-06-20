@@ -24,7 +24,7 @@ public class Object3d : MonoBehaviour
     public TextMeshProUGUI textboxValores;
     public TextMeshProUGUI Pilha;
     public Button ButtonScale, ButtonTranslate, ButtonRotateX, ButtonRotateY, ButtonRotateZ, ButtonEnviar, ButtonAplicarTransform;
-    public GameObject CuboProposto;
+    public GameObject CuboProposto, world;
 
     private float angulo, angulodividido;
     private Vector3 axis;
@@ -55,6 +55,7 @@ public class Object3d : MonoBehaviour
         Jog = ManagerBotoes.Jog;
         Debug.Log(Jog);
 
+
         textboxValores.text = "";
         countdown = 1.0f;
         countdown2 = 3.0f;
@@ -84,6 +85,13 @@ public class Object3d : MonoBehaviour
             reference.Child("sala2").SetRawJsonValueAsync(json);
 
         }
+    }
+
+    private void resetobjeto()
+    {
+        world.transform.position = Vector3.zero;
+        world.transform.rotation = Quaternion.identity;
+        world.transform.localScale = Vector3.one;
     }
 
     private void resetmatriz()
@@ -146,13 +154,13 @@ public class Object3d : MonoBehaviour
 
                 if (Jog == "jog2" && sala.matrixjog1[sala.Ronda] != Matrix4x4.zero && sala.proporjog1[sala.Ronda])
                 {
-                    aplicarTransformCuboProposto(sala.matrixjog1[sala.Ronda], sala.rotacaojog1[sala.Ronda]);
+                    aplicarTransformCuboProposto(sala.matrixjog1[sala.Ronda], sala.rotacaojog1[sala.Ronda], sala.escalajog1[sala.Ronda], sala.posjog1[sala.Ronda]);
                     esperar = false;
                 }
 
                 if (Jog == "jog1" && sala.matrixjog2[sala.Ronda] != Matrix4x4.zero && sala.proporjog2[sala.Ronda])
                 {
-                    aplicarTransformCuboProposto(sala.matrixjog2[sala.Ronda], sala.rotacaojog2[sala.Ronda]);
+                    aplicarTransformCuboProposto(sala.matrixjog2[sala.Ronda], sala.rotacaojog2[sala.Ronda], sala.escalajog1[sala.Ronda], sala.posjog1[sala.Ronda]);
                     esperar = false;
                 }
 
@@ -168,26 +176,53 @@ public class Object3d : MonoBehaviour
                 if (countdown >= 0.0f)
                 {
 
-                    //if (angulo == 0) { 
+                    if (angulo == 0)
+                    {
+                        world.transform.localScale += scaleDividido;
+                    }
+                    world.transform.RotateAround(Vector3.zero, axis, angulodividido);
+                    world.transform.Translate(positionDividido, Space.World);
 
-                    //}
-                    transform.RotateAround(Vector3.zero, axis, angulodividido);
-                    transform.Translate(positionDividido, Space.World);
-                    transform.localScale += scaleDividido;
 
 
                 }
                 else
                 {
-                    //transform.localScale = scale;
-                    //transform.RotateAround(Vector3.zero, axis, angulo);
-                    //transform.Translate(position, Space.World);
+                    if (angulo == 0)
+                    {
+                        world.transform.localScale = scale;
+                    }
+
+                    if (posant == null)
+                    {
+                        posant = Vector3.zero;
+                        rotateant = Quaternion.identity;
+                    }
+
+                    world.transform.position = posant;
+                    world.transform.rotation = rotateant;
+                    
+                    world.transform.RotateAround(Vector3.zero, axis, angulo);
+                    world.transform.Translate(position, Space.World);
+
+
+                    posant = world.transform.position;
+                    rotateant = world.transform.rotation;
+                    
+
+
+                //transform.parent = null;
+                //transform.localScale = scale;
+                //transform.parent = world.transform;
+
+                    //world.transform.localScale = scale;
+                    //world.transform.RotateAround(Vector3.zero, axis, angulo);
+                    //world.transform.Translate(position, Space.World);
 
 
 
 
                     angulo = 0;
-
                     startanimation = false;
                     countdown = 1.0f;
                 }
@@ -452,15 +487,15 @@ public class Object3d : MonoBehaviour
 
     }
 
-    public void aplicarTransformCuboProposto(Matrix4x4 matriz, Quaternion rotacaojog)
+    public void aplicarTransformCuboProposto(Matrix4x4 matriz, Quaternion rotacaojog, Vector3 escalajog, Vector3 posjog)
     {
-        position2 = matriz.ExtractPosition();
-        scale2 = matriz.ExtractScale();
+        //position2 = matriz.ExtractPosition();
+        //scale2 = matriz.ExtractScale();
         //rotate2 = matriz.ExtractRotation();
 
-        CuboProposto.transform.localPosition = position2;
-        CuboProposto.transform.localScale = scale2;
-        CuboProposto.transform.rotation = rotacaojog;
+        CuboProposto.transform.localPosition = posjog;
+        CuboProposto.transform.localScale = escalajog;
+        CuboProposto.transform.localRotation = rotacaojog;
 
         Pilha.text = "Responda ao jogador1";
         activateButtons();
@@ -520,22 +555,25 @@ public class Object3d : MonoBehaviour
 
         if (PilhaMatriz.Count > 1)
         {
+            
+
             foreach (Matrix4x4 pilha in PilhaMatriz)
             {
                 matrixfinal *= pilha;
             }
         }
 
-        scale = matrixfinal.ExtractScale();
+        scale = new Vector3 (matrix.ExtractScale().x * world.transform.localScale.x, matrix.ExtractScale().y * world.transform.localScale.y, matrix.ExtractScale().z * world.transform.localScale.z);
         position = matrix.ExtractPosition();
         //rotate = matrixfinal.ExtractRotation();
 
 
         //diferença entre a transformação atual do objeto e a transformação da matriz final dividida pelo framerate
         //escala
-        scaleDividido = (scale - transform.localScale) / 30;
+        scaleDividido = (scale - world.transform.localScale) / 30;
+
         //rotação (conversão de quartenion para eulerangle (vector3))
-        //rotateDividido = (rotate.eulerAngles - transform.localEulerAngles) / 30;
+        //rotateDividido = (rotate.eulerAngles - world.transform.localEulerAngles) / 30;
         angulodividido = angulo / 30;
 
         //posição
@@ -551,7 +589,7 @@ public class Object3d : MonoBehaviour
         resetmatriz();
         startanimation = true;
 
-        pontuacaoText.text = "Pontuaï¿½ï¿½o: " + pontuacao-- + " pontos";
+        pontuacaoText.text = "Pontuação: " + pontuacao-- + " pontos";
 
         if (pontuacao < 0)
         {
@@ -570,23 +608,28 @@ public class Object3d : MonoBehaviour
             if (Jog == "jog1")
             {
                 sala.matrixjog1[sala.Ronda] = matrixfinal;
-                sala.rotacaojog1[sala.Ronda] = transform.rotation;
-                sala.Transformjog1[sala.Ronda] = transform;
+                sala.rotacaojog1[sala.Ronda] = world.transform.rotation;
+                sala.escalajog1[sala.Ronda] = world.transform.localScale;
+                sala.posjog1[sala.Ronda] = world.transform.position;
+
             }
             else
             {
                 sala.matrixjog2[sala.Ronda] = matrixfinal;
-                sala.rotacaojog2[sala.Ronda] = transform.rotation;
-                sala.Transformjog2[sala.Ronda] = transform;
+                sala.rotacaojog2[sala.Ronda] = world.transform.rotation;
+                sala.escalajog2[sala.Ronda] = world.transform.localScale;
+                sala.posjog2[sala.Ronda] = world.transform.position;
             }
-            string json = JsonUtility.ToJson(sala);
-            DatabaseReference reference = FirebaseDatabase.DefaultInstance.RootReference;
-            reference.Child("sala2").SetRawJsonValueAsync(json);
+
 
             if (sala.proporjog2[sala.Ronda])
             {
                 sala.Ronda++;
             }
+            string json = JsonUtility.ToJson(sala);
+            DatabaseReference reference = FirebaseDatabase.DefaultInstance.RootReference;
+            reference.Child("sala2").SetRawJsonValueAsync(json);
+
             esperar = true;
 
         }
@@ -601,6 +644,8 @@ public class Object3d : MonoBehaviour
                     modoadivinha = false;
                     sala.proporjog1[sala.Ronda] = true;
                     sala.proporjog2[sala.Ronda] = false;
+                    PilhaMatriz.Clear();
+                    resetobjeto();
                 }
                 else
                 {
@@ -608,6 +653,8 @@ public class Object3d : MonoBehaviour
                     Pilha.text = "modo adivinha - falhaste";
                     matrixfinal = Matrix4x4.identity;
                     PilhaMatriz.Clear();
+                    resetobjeto();
+
 
                 }
             }
@@ -620,6 +667,9 @@ public class Object3d : MonoBehaviour
                     modoadivinha = false;
                     sala.proporjog2[sala.Ronda] = true;
                     sala.proporjog1[sala.Ronda] = false;
+                    PilhaMatriz.Clear();
+                    resetobjeto();
+
 
                 }
                 else
@@ -628,9 +678,12 @@ public class Object3d : MonoBehaviour
                     Pilha.text = "modo adivinha - falhaste";
                     matrixfinal = Matrix4x4.identity;
                     PilhaMatriz.Clear();
+                    resetobjeto();
+
                 }
             }
         }
+        resetmatriz();
     }
 
     public void writeFirebase()
@@ -749,19 +802,29 @@ public class Sala
     public Quaternion[] rotacaojog1;
     public Quaternion[] rotacaojog2;
 
+    public Vector3[] posjog1;
+    public Vector3[] posjog2;
+
+    public Vector3[] escalajog1;
+    public Vector3[] escalajog2;
+
     public Matrix4x4[] matrixjog1;
     public bool[] proporjog1;
 
     public Matrix4x4[] matrixjog2;
     public bool[] proporjog2;
-
-    public Transform[] Transformjog1, Transformjog2;
     public Sala()
     {
 
 
         rotacaojog1 = new Quaternion[10];
         rotacaojog2 = new Quaternion[10];
+
+        posjog1 = new Vector3[10];
+        posjog2 = new Vector3[10];
+
+        escalajog1 = new Vector3[10];
+        escalajog2 = new Vector3[10];
 
         Ronda = 0;
         CodigoSala = 0;
@@ -772,8 +835,7 @@ public class Sala
         matrixjog2 = new Matrix4x4[10];
         proporjog2 = new bool[10];
 
-        Transformjog1 = new Transform[10];
-        Transformjog2 = new Transform[10];
+
     }
 }
 public class jogador
