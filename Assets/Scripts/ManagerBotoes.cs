@@ -2,10 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Firebase;
+using Firebase.Auth;
+using TMPro;
 
 public class ManagerBotoes : MonoBehaviour
 {
     public static string Jog;
+
+
     public void Btn_Sair()
     {
         Application.Quit();
@@ -34,11 +39,6 @@ public class ManagerBotoes : MonoBehaviour
     public void Btn_Registar(string registo)
     {
         SceneManager.LoadScene(registo);
-    }
-
-    public void Btn_Confirmar(string confirmar)
-    {
-        SceneManager.LoadScene(confirmar);
     }
 
     public void Btn_TerminarSessao(string terminar)

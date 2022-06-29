@@ -20,4 +20,13 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Registar.unity
     guid: 9c2adb2e5c471384e9c092cbf3274968
+  - enabled: 1
+    path: Assets/Scenes/CriarJuntar.unity
+    guid: db7988f5c560afb4d983d07817c4a66f
+  - enabled: 1
+    path: Assets/Scenes/CriarSala.unity
+    guid: 7f9b3ccc2a150394fac7efe69bd0306e
+  - enabled: 1
+    path: Assets/Scenes/JuntarSala.unity
+    guid: 465a700aa4cf580468e2a41c38a713db
   m_configObjects: {}

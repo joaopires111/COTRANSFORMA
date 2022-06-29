@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Firebase.Database;
 using Firebase.Extensions;
+using UnityEngine.EventSystems;
 
 public class Object3d : MonoBehaviour
 {
@@ -12,7 +13,7 @@ public class Object3d : MonoBehaviour
     public float countdown, countdown2;
     private string eixo;
     private bool startanimation = false, esperar;
-    private string Jog;
+    private string Jog, Utilizador;
     Sala sala;
 
 
@@ -26,34 +27,72 @@ public class Object3d : MonoBehaviour
     public Button ButtonScale, ButtonTranslate, ButtonRotateX, ButtonRotateY, ButtonRotateZ, ButtonEnviar, ButtonAplicarTransform;
     public GameObject CuboProposto, world;
 
+
+
+    private int indexbotao1, indexbotao2, indexbotao1temp, indexbotao2temp;
+    private int[] posicaoBotaoPlay;
     private float angulo, angulodividido;
     private Vector3 axis;
     private ArrayList PilhaMatriz;
     private Matrix4x4 matrixfinal;
-    public Matrix4x4 localToWorldMatrix;
     private Vector4 column0, column1, column2, column3;
     private MatrixFirebase readDB;
-    private Vector3 scale, position, scale2, position2, scaleDividido, positionDividido, scaleant, posant;
-    private Quaternion rotateant, rotate2;
+    private Vector3 scale, position, scaleDividido, positionDividido, scaleant, posant;
+    private Vector3[] scale2, position2, axis2;
+    public float[] angulo2;
+    public string nomebotao;
+    private string nomepilha;
+
+    public GameObject ButtonPilha, PlayButton;
+    private GameObject[] buttonT, buttonP;
+
+
+    private Quaternion rotateant;
     private bool modoadivinha;
 
     public TextMeshProUGUI Tempo;
 
     public float timeValue = 301;
-    public int pontuacao;
+    public int pontuacao, contador;
     public TextMeshProUGUI pontuacaoText;
+    private bool ActivateAnimacao;
 
 
 
     // Start is called before the first frame update
     void Start()
     {
+        indexbotao1 = -1;
+        indexbotao2 = -1;
+        nomebotao = "??";
+        scale2 = new Vector3[10];
+        position2 = new Vector3[10];
+        angulo2 = new float[10];
+        axis2 = new Vector3[10];
+        buttonT = new GameObject[10];
+        buttonP = new GameObject[10];
+        posicaoBotaoPlay = new int[10];
+        Utilizador = AuthManager.Utilizador;
+        contador = 0;
 
         esperar = false;
-        sala = new Sala();
-        sala.Ronda = 0;
-        Jog = ManagerBotoes.Jog;
+
+        //sala = new Sala();
+
+        
+        Jog = CriarSala.Jog;
+
+        Debug.Log(string.IsNullOrEmpty(Jog));
         Debug.Log(Jog);
+
+        if (string.IsNullOrEmpty(Jog))
+        {
+            Jog = JuntarSala.Jog;
+        }
+
+
+
+
 
 
         textboxValores.text = "";
@@ -69,29 +108,35 @@ public class Object3d : MonoBehaviour
 
         if (Jog == "jog2")
         {
-            sala.proporjog2[sala.Ronda] = false;
+            sala = JuntarSala.sala;
+
             esperar = true;
             Pilha.text = "espere pelo jogador1";
             deactivateButtons();
         }
         else
         {
+            sala = CriarSala.sala;
+
             esperar = false;
-            sala.proporjog1[sala.Ronda] = true;
             Pilha.text = "Envie a proposta ao jogador2";
-
-            string json = JsonUtility.ToJson(sala);
-            DatabaseReference reference = FirebaseDatabase.DefaultInstance.RootReference;
-            reference.Child("sala2").SetRawJsonValueAsync(json);
-
         }
     }
 
     private void resetobjeto()
     {
+        world.transform.position = posant = Vector3.zero;
+        world.transform.rotation = rotateant = Quaternion.identity;
+        world.transform.localScale = Vector3.one;
+       
+    }
+
+    private void resetobjetoSemAnt()
+    {
         world.transform.position = Vector3.zero;
         world.transform.rotation = Quaternion.identity;
         world.transform.localScale = Vector3.one;
+
     }
 
     private void resetmatriz()
@@ -149,7 +194,6 @@ public class Object3d : MonoBehaviour
                 readFirebaseSala();
                 countdown2 = 3.0f;
 
-
                 Debug.Log(Jog == "jog2" && sala.matrixjog1[sala.Ronda] != Matrix4x4.zero && sala.proporjog1[sala.Ronda]);
 
                 if (Jog == "jog2" && sala.matrixjog1[sala.Ronda] != Matrix4x4.zero && sala.proporjog1[sala.Ronda])
@@ -188,6 +232,7 @@ public class Object3d : MonoBehaviour
                 }
                 else
                 {
+                    //acerto final da transformação
                     if (angulo == 0)
                     {
                         world.transform.localScale = scale;
@@ -205,15 +250,12 @@ public class Object3d : MonoBehaviour
                     world.transform.RotateAround(Vector3.zero, axis, angulo);
                     world.transform.Translate(position, Space.World);
 
-
                     posant = world.transform.position;
                     rotateant = world.transform.rotation;
-                    
 
-
-                //transform.parent = null;
-                //transform.localScale = scale;
-                //transform.parent = world.transform;
+                    //transform.parent = null;
+                    //transform.localScale = scale;
+                    //transform.parent = world.transform;
 
                     //world.transform.localScale = scale;
                     //world.transform.RotateAround(Vector3.zero, axis, angulo);
@@ -227,7 +269,6 @@ public class Object3d : MonoBehaviour
                     countdown = 1.0f;
                 }
             }
-
 
         }
 
@@ -317,6 +358,8 @@ public class Object3d : MonoBehaviour
         inputx1.colors = cb;
         inputy2.colors = cb;
         inputz3.colors = cb;
+        nomebotao = "Escala";
+
     }
 
 
@@ -341,6 +384,8 @@ public class Object3d : MonoBehaviour
         inputx4.colors = cb;
         inputy4.colors = cb;
         inputz4.colors = cb;
+
+        nomebotao = "Translação";
     }
     public void ButtonRotateXActive()
     {
@@ -351,7 +396,7 @@ public class Object3d : MonoBehaviour
         inputy3.interactable = true;
         inputz2.interactable = true;
         inputz3.interactable = true;
-        textboxValores.text = "Rotate X";
+        textboxValores.text = "Rotação em X: ";
         eixo = "x";
 
         Color newColor = new Color(0.95f, 0.64f, 0.38f, 1f);
@@ -369,6 +414,7 @@ public class Object3d : MonoBehaviour
         inputz2.colors = cb;
         inputz3.colors = cb;
 
+        nomebotao = "Rotação X";
     }
     public void ButtonRotateYActive()
     {
@@ -380,6 +426,7 @@ public class Object3d : MonoBehaviour
         inputx3.interactable = true;
         inputz1.interactable = true;
         inputz3.interactable = true;
+        textboxValores.text = "Rotação em Y: ";
         eixo = "y";
 
         Color newColor = new Color(0.91f, 0.44f, 0.32f, 1f);
@@ -396,6 +443,8 @@ public class Object3d : MonoBehaviour
         inputx3.colors = cb;
         inputz1.colors = cb;
         inputz3.colors = cb;
+
+        nomebotao = "Rotação Y";
     }
     public void ButtonRotateZActive()
     {
@@ -407,6 +456,7 @@ public class Object3d : MonoBehaviour
         inputx2.interactable = true;
         inputy1.interactable = true;
         inputy2.interactable = true;
+        textboxValores.text = "Rotação em Z: ";
         eixo = "z";
 
         Color newColor = new Color(0.36f, 0.73f, 0.31f, 1f);
@@ -422,6 +472,8 @@ public class Object3d : MonoBehaviour
         inputx2.colors = cb;
         inputy1.colors = cb;
         inputy2.colors = cb;
+
+        nomebotao = "Rotação Z";
     }
 
 
@@ -519,6 +571,12 @@ public class Object3d : MonoBehaviour
 
     public void aplicarTransform()
     {
+        //modifica a posição do objeto para o ultimo play
+        if (contador > 0)
+        {
+            PlayPilha(contador - 1, false);
+        }
+
         Matrix4x4 matrix;
 
         x1 = float.Parse(inputx1.text);
@@ -549,37 +607,62 @@ public class Object3d : MonoBehaviour
 
         PilhaMatriz.Add(matrix);
 
-        matrixfinal = (Matrix4x4)PilhaMatriz[0];
+        matrixfinal = Matrix4x4.identity;
 
-
-
-        if (PilhaMatriz.Count > 1)
-        {
-            
-
-            foreach (Matrix4x4 pilha in PilhaMatriz)
+        foreach (Matrix4x4 pilha in PilhaMatriz)
             {
                 matrixfinal *= pilha;
             }
-        }
+
+        Debug.Log("depois da  pilha transform -" + matrixfinal);
 
         scale = new Vector3 (matrix.ExtractScale().x * world.transform.localScale.x, matrix.ExtractScale().y * world.transform.localScale.y, matrix.ExtractScale().z * world.transform.localScale.z);
         position = matrix.ExtractPosition();
         //rotate = matrixfinal.ExtractRotation();
 
 
-        //diferen�a entre a transforma��o atual do objeto e a transforma��o da matriz final dividida pelo framerate
+        //diferença entre a transformação atual do objeto e a transformação da matriz final dividida pelo framerate
         //escala
         scaleDividido = (scale - world.transform.localScale) / 30;
 
-        //rota��o (convers�o de quartenion para eulerangle (vector3))
-        //rotateDividido = (rotate.eulerAngles - world.transform.localEulerAngles) / 30;
+        //rotação (conversão de quartenion para eulerangle (vector3))
         angulodividido = angulo / 30;
 
-        //posi��o
+        //posição
         positionDividido = position / 30;
 
+        //guardar as transformaçoes para trocar a ordem
+        scale2[contador] = matrix.ExtractScale();
+        position2[contador] = position;
+        angulo2[contador] = angulo;
+        axis2[contador] = axis;
 
+        //CRIAR BOTÃO da pilha de transformação
+        buttonT[contador] = Instantiate(ButtonPilha, GameObject.FindGameObjectWithTag("Canvas").transform);
+        buttonT[contador].transform.localPosition = new Vector3(44 + (contador * 140), 188, 0);
+        buttonT[contador].GetComponentInChildren<TMPro.TextMeshProUGUI>().text = nomebotao;
+
+        //CRIAR evento de click no botão
+        EventTrigger trigger = buttonT[contador].GetComponent<EventTrigger>();
+        EventTrigger.Entry entry = new EventTrigger.Entry();
+        entry.eventID = EventTriggerType.PointerClick;
+        int x = contador;
+        entry.callback.AddListener((eventData) => { clicarpilha(x); });
+        trigger.triggers.Add(entry);
+
+        //CRIAR botão para correr a animação da transformação
+        buttonP[contador] = Instantiate(PlayButton, GameObject.FindGameObjectWithTag("Canvas").transform);
+        buttonP[contador].transform.localPosition = new Vector3(44 + (contador * 140), 140, 0);
+        buttonP[contador].GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Play " + contador;
+
+        //CRIAR evento de click no botão play
+        EventTrigger trigger2 = buttonP[contador].GetComponent<EventTrigger>();
+        EventTrigger.Entry entry2 = new EventTrigger.Entry();
+        entry2.eventID = EventTriggerType.PointerClick;
+        entry2.callback.AddListener((eventData) => { PlayPilha(x, false); });
+        posicaoBotaoPlay[contador] = x;
+
+        trigger2.triggers.Add(entry2);
 
         //Valores.text = rotate.x.ToString();
         /*textboxValores.text = "Position " + position.ToString();
@@ -587,16 +670,143 @@ public class Object3d : MonoBehaviour
 
 
         resetmatriz();
+
+
+
+
         startanimation = true;
 
-        pontuacaoText.text = "Pontua��o: " + pontuacao-- + " pontos";
+        pontuacaoText.text = "Pontuação: " + pontuacao-- + " pontos";
 
         if (pontuacao < 0)
         {
             ButtonAplicarTransform.interactable = false;
+        }
 
+        contador++;
+    }
+
+    public void PlayPilha(int idx_, bool reset)
+    {
+        Debug.Log(idx_);
+        int index;
+        //funcao que é necessário para invocar a função na ultima posição
+        if (reset)
+        {
+            index = posicaoBotaoPlay[idx_];
+        }
+        else {
+            index = idx_;
+        }
+
+        //ActivateAnimacao = true;
+        //aplicar as transformações na nova ordem
+
+        resetobjetoSemAnt();
+        Vector3 escalareal = new Vector3(1, 1, 1);
+
+        for (int i = 0; i <= index; i++)
+        {
+            world.transform.RotateAround(Vector3.zero, axis2[i], angulo2[i]);
+            world.transform.Translate(position2[i], Space.World);
+
+            if (angulo2[i] == 0)
+            {
+                escalareal = new Vector3(scale2[i].x * escalareal.x, scale2[i].y * escalareal.y, scale2[i].z * escalareal.z);
+                world.transform.localScale = escalareal;
+
+            }
         }
     }
+
+
+     void clicarpilha(int idx_)
+    {
+        Debug.Log(posicaoBotaoPlay[idx_]);
+        if (indexbotao1 == -1)
+        {
+            indexbotao1 = idx_;
+            //indexbotao1temp = idx_;
+
+        }   
+        else if(indexbotao2 == -1)
+        {
+            indexbotao2 = idx_;
+            //indexbotao2temp = idx_;
+
+            string STRINGtemp = buttonT[indexbotao1temp].GetComponentInChildren<TMPro.TextMeshProUGUI>().text;
+
+            //Vector3 POStempPlay = buttonP[indexbotao1].transform.position;
+
+            Vector3 SCALEtemp = scale2[indexbotao1];
+            Vector3 POSITIONtemp = position2[indexbotao1];
+            float ANGtemp = angulo2[indexbotao1];
+            Vector3 AXIStemp = axis2[indexbotao1];
+            Matrix4x4 MATRIXtemp = (Matrix4x4)PilhaMatriz[indexbotao1];
+
+            //Trocar posicao dos  botoes
+            buttonT[indexbotao1temp].GetComponentInChildren<TMPro.TextMeshProUGUI>().text = buttonT[indexbotao2temp].GetComponentInChildren<TMPro.TextMeshProUGUI>().text;
+            buttonT[indexbotao2temp].GetComponentInChildren<TMPro.TextMeshProUGUI>().text = STRINGtemp;
+            //Trocar posicao dos  botoes Play
+            //buttonP[indexbotao1].transform.position = buttonP[indexbotao2].transform.position;
+            //buttonP[indexbotao2].transform.position = POStempPlay;
+
+            //trocar ordem das transformações no array
+            scale2[indexbotao1] = scale2[indexbotao2];
+            position2[indexbotao1] = position2[indexbotao2];
+            angulo2[indexbotao1] = angulo2[indexbotao2];
+            axis2[indexbotao1] = axis2[indexbotao2];
+
+            scale2[indexbotao2] = SCALEtemp;
+            position2[indexbotao2] = POSITIONtemp;
+            angulo2[indexbotao2] = ANGtemp;
+            axis2[indexbotao2] = AXIStemp;
+
+            PilhaMatriz[indexbotao1] = PilhaMatriz[indexbotao2];
+            PilhaMatriz[indexbotao2] = MATRIXtemp;
+
+            //troca o index da animaçao associada ao botao
+            int POSPLAYtemp = posicaoBotaoPlay[indexbotao1];
+            posicaoBotaoPlay[indexbotao1] = posicaoBotaoPlay[indexbotao2];
+            posicaoBotaoPlay[indexbotao2] = POSPLAYtemp;
+
+
+            //aplicar as transformações na nova ordem
+            resetobjeto();
+            matrixfinal = Matrix4x4.identity;
+            Vector3 escalareal = new Vector3(1, 1, 1);
+
+            for (int i = 0; i < contador; i++)
+            {
+                matrixfinal *= (Matrix4x4)PilhaMatriz[i];
+
+                world.transform.RotateAround(Vector3.zero, axis2[i], angulo2[i]);
+                world.transform.Translate(position2[i], Space.World);
+
+                if(angulo2[i] == 0)
+                {
+                escalareal = new Vector3(scale2[i].x * escalareal.x, scale2[i].y * escalareal.y , scale2[i].z * escalareal.z);
+                world.transform.localScale = escalareal;
+
+                }
+            }
+            //guarda a posição anterior para acerto da transformacao
+            posant = world.transform.position;
+            rotateant = world.transform.rotation;
+
+
+
+            //Reset dos indices dos botoes a serem trocados
+            indexbotao1 = -1;
+            indexbotao2 = -1;
+
+            
+        }
+          
+
+    }
+
+
 
     public void enviar()
     {
@@ -632,6 +842,7 @@ public class Object3d : MonoBehaviour
 
             esperar = true;
 
+
         }
         else
         {
@@ -651,7 +862,6 @@ public class Object3d : MonoBehaviour
                 {
                     //falhou
                     Pilha.text = "modo adivinha - falhaste";
-                    matrixfinal = Matrix4x4.identity;
                     PilhaMatriz.Clear();
                     resetobjeto();
 
@@ -676,7 +886,6 @@ public class Object3d : MonoBehaviour
                 {
                     //falhou
                     Pilha.text = "modo adivinha - falhaste";
-                    matrixfinal = Matrix4x4.identity;
                     PilhaMatriz.Clear();
                     resetobjeto();
 
@@ -792,64 +1001,16 @@ public static class MatrixExtensions
     }
 }
 
-
-
-public class Sala
-{
-    public int CodigoSala = 0000;
-    public int Ronda;
-
-    public Quaternion[] rotacaojog1;
-    public Quaternion[] rotacaojog2;
-
-    public Vector3[] posjog1;
-    public Vector3[] posjog2;
-
-    public Vector3[] escalajog1;
-    public Vector3[] escalajog2;
-
-    public Matrix4x4[] matrixjog1;
-    public bool[] proporjog1;
-
-    public Matrix4x4[] matrixjog2;
-    public bool[] proporjog2;
-    public Sala()
-    {
-
-
-        rotacaojog1 = new Quaternion[10];
-        rotacaojog2 = new Quaternion[10];
-
-        posjog1 = new Vector3[10];
-        posjog2 = new Vector3[10];
-
-        escalajog1 = new Vector3[10];
-        escalajog2 = new Vector3[10];
-
-        Ronda = 0;
-        CodigoSala = 0;
-
-        matrixjog1 = new Matrix4x4[10];
-        proporjog1 = new bool[10];
-
-        matrixjog2 = new Matrix4x4[10];
-        proporjog2 = new bool[10];
-
-
-    }
-}
 public class jogador
 {
-    public Matrix4x4[] matrixjog1;
-    public bool[] proporjog1;
-
-    public jogador()
-    {
-        matrixjog1 = new Matrix4x4[10];
-        proporjog1 = new bool[10];
-    }
+    public string nomejog;
+    public int[] codigoSala;
 
 }
+
+
+
+
 
 
 public class MatrixFirebase
