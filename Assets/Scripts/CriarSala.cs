@@ -22,7 +22,7 @@ public class CriarSala : MonoBehaviour
     void Start()
     {
 
-        warningsala.text = "Aguarde que o jogador entre ...";
+        warningsala.text = "Aguarde que o jogador entre...";
 
         esperar = true;
         Jog = "jog1";

@@ -43,7 +43,9 @@ public class Object3d : MonoBehaviour
     public string nomebotao;
     private string nomepilha;
 
+    //prefab dos botoes
     public GameObject ButtonPilha, PlayButton;
+    //lista de prefab dos botoes
     private GameObject[] buttonT, buttonP;
 
 

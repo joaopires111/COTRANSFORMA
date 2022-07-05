@@ -50,14 +50,14 @@ public class JuntarSala : MonoBehaviour
         {
             if (task.IsFaulted)
             {
-                warningsala.text = "Codigo errado !";
+                warningsala.text = "Codigo errado!";
                 // Handle the error...
             }
             else if (task.IsCompleted)
             {
                 DataSnapshot snapshot = task.Result;
                 sala = JsonUtility.FromJson<Sala>(snapshot.GetRawJsonValue());
-                warningsala.text = "Codigo Correto !";
+                warningsala.text = "Codigo Correto!";
 
                 if (!sala.jog2entrou) {
 

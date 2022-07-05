@@ -27,6 +27,12 @@ EditorBuildSettings:
     path: Assets/Scenes/CriarSala.unity
     guid: 7f9b3ccc2a150394fac7efe69bd0306e
   - enabled: 1
-    path: Assets/Scenes/JuntarSala.unity
+    path: Assets/Scenes/Historico.unity
     guid: 465a700aa4cf580468e2a41c38a713db
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 1
+    path: Assets/Scenes/SampleSceneHistorico.unity
+    guid: 86663aeec036fbe489f143a9c00503d9
   m_configObjects: {}
