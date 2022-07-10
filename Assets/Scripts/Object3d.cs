@@ -25,11 +25,11 @@ public class Object3d : MonoBehaviour
     public TextMeshProUGUI textboxValores;
     public TextMeshProUGUI Pilha;
     public Button ButtonScale, ButtonTranslate, ButtonRotateX, ButtonRotateY, ButtonRotateZ, ButtonEnviar, ButtonAplicarTransform;
-    public GameObject CuboProposto, world;
+    public GameObject CuboProposto, world2;
 
 
 
-    private int indexbotao1, indexbotao2, indexbotao1temp, indexbotao2temp;
+    private int indexbotao1, indexbotao2;
     private int[] posicaoBotaoPlay;
     private float angulo, angulodividido;
     private Vector3 axis;
@@ -37,7 +37,7 @@ public class Object3d : MonoBehaviour
     private Matrix4x4 matrixfinal;
     private Vector4 column0, column1, column2, column3;
     private MatrixFirebase readDB;
-    private Vector3 scale, position, scaleDividido, positionDividido, scaleant, posant;
+    private Vector3 scale, position, scaleDividido, positionDividido;
     private Vector3[] scale2, position2, axis2;
     public float[] angulo2;
     public string nomebotao;
@@ -46,10 +46,10 @@ public class Object3d : MonoBehaviour
     //prefab dos botoes
     public GameObject ButtonPilha, PlayButton;
     //lista de prefab dos botoes
-    private GameObject[] buttonT, buttonP;
+    private GameObject[] buttonT, buttonP, WORLDprefab;
 
 
-    private Quaternion rotateant;
+
     private bool modoadivinha;
 
     public TextMeshProUGUI Tempo;
@@ -71,8 +71,11 @@ public class Object3d : MonoBehaviour
         position2 = new Vector3[10];
         angulo2 = new float[10];
         axis2 = new Vector3[10];
+
         buttonT = new GameObject[10];
         buttonP = new GameObject[10];
+        WORLDprefab = new GameObject[10];
+
         posicaoBotaoPlay = new int[10];
         Utilizador = AuthManager.Utilizador;
         contador = 0;
@@ -91,11 +94,6 @@ public class Object3d : MonoBehaviour
         {
             Jog = JuntarSala.Jog;
         }
-
-
-
-
-
 
         textboxValores.text = "";
         countdown = 1.0f;
@@ -127,17 +125,18 @@ public class Object3d : MonoBehaviour
 
     private void resetobjeto()
     {
-        world.transform.position = posant = Vector3.zero;
-        world.transform.rotation = rotateant = Quaternion.identity;
-        world.transform.localScale = Vector3.one;
-       
-    }
 
-    private void resetobjetoSemAnt()
-    {
-        world.transform.position = Vector3.zero;
-        world.transform.rotation = Quaternion.identity;
-        world.transform.localScale = Vector3.one;
+        transform.parent = null;
+
+        transform.localScale = Vector3.one;
+        transform.localRotation = Quaternion.identity;
+        transform.localPosition = Vector3.zero;
+
+        System.Array.Clear(WORLDprefab, 0, WORLDprefab.Length);
+
+        foreach(GameObject prefab in GameObject.FindGameObjectsWithTag("worldprefabtag")) Destroy(prefab);
+        //acerto para final de ronda
+        //contador = 0;
 
     }
 
@@ -224,10 +223,11 @@ public class Object3d : MonoBehaviour
 
                     if (angulo == 0)
                     {
-                        world.transform.localScale += scaleDividido;
+                        WORLDprefab[contador - 1].transform.localScale += scaleDividido;
                     }
-                    world.transform.RotateAround(Vector3.zero, axis, angulodividido);
-                    world.transform.Translate(positionDividido, Space.World);
+                    WORLDprefab[contador - 1].transform.RotateAround(Vector3.zero, axis, angulodividido);
+                    WORLDprefab[contador - 1].transform.Translate(positionDividido, Space.World);
+
 
 
 
@@ -237,34 +237,14 @@ public class Object3d : MonoBehaviour
                     //acerto final da transformação
                     if (angulo == 0)
                     {
-                        world.transform.localScale = scale;
+                        WORLDprefab[contador - 1].transform.localScale = scale;
                     }
 
-                    if (posant == null)
-                    {
-                        posant = Vector3.zero;
-                        rotateant = Quaternion.identity;
-                    }
+                    WORLDprefab[contador - 1].transform.localPosition = Vector3.zero;
+                    WORLDprefab[contador - 1].transform.localRotation = Quaternion.identity;
 
-                    world.transform.position = posant;
-                    world.transform.rotation = rotateant;
-                    
-                    world.transform.RotateAround(Vector3.zero, axis, angulo);
-                    world.transform.Translate(position, Space.World);
-
-                    posant = world.transform.position;
-                    rotateant = world.transform.rotation;
-
-                    //transform.parent = null;
-                    //transform.localScale = scale;
-                    //transform.parent = world.transform;
-
-                    //world.transform.localScale = scale;
-                    //world.transform.RotateAround(Vector3.zero, axis, angulo);
-                    //world.transform.Translate(position, Space.World);
-
-
-
+                    WORLDprefab[contador - 1].transform.RotateAround(Vector3.zero, axis, angulo);
+                    WORLDprefab[contador - 1].transform.Translate(position, Space.World);
 
                     angulo = 0;
                     startanimation = false;
@@ -418,7 +398,7 @@ public class Object3d : MonoBehaviour
 
         nomebotao = "Rotação X";
     }
-    public void ButtonRotateYActive()
+    public void ButtonRotateYActive()       
     {
 
         deactivateMatriz();
@@ -576,7 +556,7 @@ public class Object3d : MonoBehaviour
         //modifica a posição do objeto para o ultimo play
         if (contador > 0)
         {
-            PlayPilha(contador - 1, false);
+           // PlayPilha(contador - 1);
         }
 
         Matrix4x4 matrix;
@@ -616,16 +596,29 @@ public class Object3d : MonoBehaviour
                 matrixfinal *= pilha;
             }
 
-        Debug.Log("depois da  pilha transform -" + matrixfinal);
+        //CRIAR WORLD EMPTY OBJECT
+        WORLDprefab[contador] = Instantiate(world2);
 
-        scale = new Vector3 (matrix.ExtractScale().x * world.transform.localScale.x, matrix.ExtractScale().y * world.transform.localScale.y, matrix.ExtractScale().z * world.transform.localScale.z);
+        if (contador == 0)
+        {
+            transform.parent = WORLDprefab[contador].transform;
+        }
+        else
+        {
+            WORLDprefab[contador - 1].transform.parent = WORLDprefab[contador].transform;
+        }
+
+
+
+        //scale = new Vector3 (matrix.ExtractScale().x * world.transform.localScale.x, matrix.ExtractScale().y * world.transform.localScale.y, matrix.ExtractScale().z * world.transform.localScale.z);
+        scale = matrix.ExtractScale();
         position = matrix.ExtractPosition();
         //rotate = matrixfinal.ExtractRotation();
 
 
         //diferença entre a transformação atual do objeto e a transformação da matriz final dividida pelo framerate
         //escala
-        scaleDividido = (scale - world.transform.localScale) / 30;
+        scaleDividido = (scale - Vector3.one) / 30;
 
         //rotação (conversão de quartenion para eulerangle (vector3))
         angulodividido = angulo / 30;
@@ -652,6 +645,7 @@ public class Object3d : MonoBehaviour
         entry.callback.AddListener((eventData) => { clicarpilha(x); });
         trigger.triggers.Add(entry);
 
+
         //CRIAR botão para correr a animação da transformação
         buttonP[contador] = Instantiate(PlayButton, GameObject.FindGameObjectWithTag("Canvas").transform);
         buttonP[contador].transform.localPosition = new Vector3(44 + (contador * 140), 140, 0);
@@ -661,20 +655,16 @@ public class Object3d : MonoBehaviour
         EventTrigger trigger2 = buttonP[contador].GetComponent<EventTrigger>();
         EventTrigger.Entry entry2 = new EventTrigger.Entry();
         entry2.eventID = EventTriggerType.PointerClick;
-        entry2.callback.AddListener((eventData) => { PlayPilha(x, false); });
+        entry2.callback.AddListener((eventData) => { PlayPilha(x); });
         posicaoBotaoPlay[contador] = x;
-
         trigger2.triggers.Add(entry2);
 
-        //Valores.text = rotate.x.ToString();
-        /*textboxValores.text = "Position " + position.ToString();
-        textboxValores.text = "Rotate " + rotate.ToString();*/
+
+
+
 
 
         resetmatriz();
-
-
-
 
         startanimation = true;
 
@@ -688,35 +678,36 @@ public class Object3d : MonoBehaviour
         contador++;
     }
 
-    public void PlayPilha(int idx_, bool reset)
+    public void PlayPilha(int idx_)
     {
         Debug.Log(idx_);
-        int index;
-        //funcao que é necessário para invocar a função na ultima posição
-        if (reset)
-        {
-            index = posicaoBotaoPlay[idx_];
-        }
-        else {
-            index = idx_;
-        }
 
         //ActivateAnimacao = true;
         //aplicar as transformações na nova ordem
 
-        resetobjetoSemAnt();
-        Vector3 escalareal = new Vector3(1, 1, 1);
+        resetobjeto();
 
-        for (int i = 0; i <= index; i++)
+
+        for (int i = 0; i <= idx_; i++)
         {
-            world.transform.RotateAround(Vector3.zero, axis2[i], angulo2[i]);
-            world.transform.Translate(position2[i], Space.World);
+
+            //EMPTY WORLD
+            WORLDprefab[i] = Instantiate(world2);
+            if (i == 0)
+            {
+                transform.parent = WORLDprefab[i].transform;
+            }
+            else
+            {
+                WORLDprefab[i - 1].transform.parent = WORLDprefab[i].transform;
+            }
+
+            WORLDprefab[i].transform.RotateAround(Vector3.zero, axis2[i], angulo2[i]);
+            WORLDprefab[i].transform.Translate(position2[i], Space.World);
 
             if (angulo2[i] == 0)
             {
-                escalareal = new Vector3(scale2[i].x * escalareal.x, scale2[i].y * escalareal.y, scale2[i].z * escalareal.z);
-                world.transform.localScale = escalareal;
-
+                WORLDprefab[i].transform.localScale = scale2[i];
             }
         }
     }
@@ -728,17 +719,15 @@ public class Object3d : MonoBehaviour
         if (indexbotao1 == -1)
         {
             indexbotao1 = idx_;
-            //indexbotao1temp = idx_;
 
         }   
         else if(indexbotao2 == -1)
         {
             indexbotao2 = idx_;
-            //indexbotao2temp = idx_;
 
-            string STRINGtemp = buttonT[indexbotao1temp].GetComponentInChildren<TMPro.TextMeshProUGUI>().text;
+            string STRINGtemp = buttonT[indexbotao1].GetComponentInChildren<TMPro.TextMeshProUGUI>().text;
 
-            //Vector3 POStempPlay = buttonP[indexbotao1].transform.position;
+            Vector3 POStempPlay = buttonP[indexbotao1].transform.position;
 
             Vector3 SCALEtemp = scale2[indexbotao1];
             Vector3 POSITIONtemp = position2[indexbotao1];
@@ -747,8 +736,8 @@ public class Object3d : MonoBehaviour
             Matrix4x4 MATRIXtemp = (Matrix4x4)PilhaMatriz[indexbotao1];
 
             //Trocar posicao dos  botoes
-            buttonT[indexbotao1temp].GetComponentInChildren<TMPro.TextMeshProUGUI>().text = buttonT[indexbotao2temp].GetComponentInChildren<TMPro.TextMeshProUGUI>().text;
-            buttonT[indexbotao2temp].GetComponentInChildren<TMPro.TextMeshProUGUI>().text = STRINGtemp;
+            buttonT[indexbotao1].GetComponentInChildren<TMPro.TextMeshProUGUI>().text = buttonT[indexbotao2].GetComponentInChildren<TMPro.TextMeshProUGUI>().text;
+            buttonT[indexbotao2].GetComponentInChildren<TMPro.TextMeshProUGUI>().text = STRINGtemp;
             //Trocar posicao dos  botoes Play
             //buttonP[indexbotao1].transform.position = buttonP[indexbotao2].transform.position;
             //buttonP[indexbotao2].transform.position = POStempPlay;
@@ -780,23 +769,29 @@ public class Object3d : MonoBehaviour
 
             for (int i = 0; i < contador; i++)
             {
+                //EMPTY WORLD
+                WORLDprefab[i] = Instantiate(world2);
+                if (i == 0)
+                {
+                    transform.parent = WORLDprefab[i].transform;
+                }
+                else
+                {
+                    WORLDprefab[i - 1].transform.parent = WORLDprefab[i].transform;
+                }
+
                 matrixfinal *= (Matrix4x4)PilhaMatriz[i];
 
-                world.transform.RotateAround(Vector3.zero, axis2[i], angulo2[i]);
-                world.transform.Translate(position2[i], Space.World);
+                WORLDprefab[i].transform.RotateAround(Vector3.zero, axis2[i], angulo2[i]);
+                WORLDprefab[i].transform.Translate(position2[i], Space.World);
 
                 if(angulo2[i] == 0)
                 {
                 escalareal = new Vector3(scale2[i].x * escalareal.x, scale2[i].y * escalareal.y , scale2[i].z * escalareal.z);
-                world.transform.localScale = escalareal;
+                    WORLDprefab[i].transform.localScale = escalareal;
 
                 }
             }
-            //guarda a posição anterior para acerto da transformacao
-            posant = world.transform.position;
-            rotateant = world.transform.rotation;
-
-
 
             //Reset dos indices dos botoes a serem trocados
             indexbotao1 = -1;
@@ -820,17 +815,17 @@ public class Object3d : MonoBehaviour
             if (Jog == "jog1")
             {
                 sala.matrixjog1[sala.Ronda] = matrixfinal;
-                sala.rotacaojog1[sala.Ronda] = world.transform.rotation;
-                sala.escalajog1[sala.Ronda] = world.transform.localScale;
-                sala.posjog1[sala.Ronda] = world.transform.position;
+                sala.rotacaojog1[sala.Ronda] = WORLDprefab[contador - 1].transform.rotation;
+                sala.escalajog1[sala.Ronda] = WORLDprefab[contador - 1].transform.lossyScale;
+                sala.posjog1[sala.Ronda] = WORLDprefab[contador - 1].transform.position;
 
             }
             else
             {
                 sala.matrixjog2[sala.Ronda] = matrixfinal;
-                sala.rotacaojog2[sala.Ronda] = world.transform.rotation;
-                sala.escalajog2[sala.Ronda] = world.transform.localScale;
-                sala.posjog2[sala.Ronda] = world.transform.position;
+                sala.rotacaojog2[sala.Ronda] = WORLDprefab[contador - 1].transform.rotation;
+                sala.escalajog2[sala.Ronda] = WORLDprefab[contador - 1].transform.lossyScale;
+                sala.posjog2[sala.Ronda] = WORLDprefab[contador - 1].transform.position;
             }
 
 

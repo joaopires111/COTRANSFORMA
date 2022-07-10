@@ -6,6 +6,8 @@ TagManager:
   tags:
   - numeros
   - Canvas
+  - sidemenu
+  - worldprefabtag
   layers:
   - Default
   - TransparentFX
