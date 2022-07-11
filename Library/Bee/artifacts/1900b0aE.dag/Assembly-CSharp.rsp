@@ -344,6 +344,7 @@
 "Assets/Scripts/CriarSala.cs"
 "Assets/Scripts/JuntarSala.cs"
 "Assets/Scripts/ManagerBotoes.cs"
+"Assets/Scripts/ManagerFinal.cs"
 "Assets/Scripts/ManagerHistorico.cs"
 "Assets/Scripts/NomeUtilizador_MenuJogo.cs"
 "Assets/Scripts/Object3d.cs"

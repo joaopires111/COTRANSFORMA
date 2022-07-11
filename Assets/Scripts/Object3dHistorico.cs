@@ -196,19 +196,7 @@ public class Object3dHistorico : MonoBehaviour
                 readFirebaseSala();
                 countdown2 = 3.0f;
 
-                Debug.Log(Jog == "jog2" && sala.matrixjog1[sala.Ronda] != Matrix4x4.zero && sala.proporjog1[sala.Ronda]);
 
-                if (Jog == "jog2" && sala.matrixjog1[sala.Ronda] != Matrix4x4.zero && sala.proporjog1[sala.Ronda])
-                {
-                    aplicarTransformCuboProposto(sala.matrixjog1[sala.Ronda], sala.rotacaojog1[sala.Ronda], sala.escalajog1[sala.Ronda], sala.posjog1[sala.Ronda]);
-                    esperar = false;
-                }
-
-                if (Jog == "jog1" && sala.matrixjog2[sala.Ronda] != Matrix4x4.zero && sala.proporjog2[sala.Ronda])
-                {
-                    aplicarTransformCuboProposto(sala.matrixjog2[sala.Ronda], sala.rotacaojog2[sala.Ronda], sala.escalajog1[sala.Ronda], sala.posjog1[sala.Ronda]);
-                    esperar = false;
-                }
 
 
             }
@@ -554,16 +542,7 @@ public class Object3dHistorico : MonoBehaviour
         Pilha.text = "Responda ao jogador1";
         activateButtons();
 
-        if (Jog == "jog2" && sala.proporjog1[sala.Ronda])
-        {
-            modoadivinha = true;
-            Pilha.text = "modoadivinha";
-        }
-        if (Jog == "jog1" && sala.proporjog2[sala.Ronda])
-        {
-            modoadivinha = true;
-            Pilha.text = "modoadivinha";
-        }
+
 
     }
 
@@ -834,10 +813,7 @@ public class Object3dHistorico : MonoBehaviour
             }
 
 
-            if (sala.proporjog2[sala.Ronda])
-            {
-                sala.Ronda++;
-            }
+
             string json = JsonUtility.ToJson(sala);
             DatabaseReference reference = FirebaseDatabase.DefaultInstance.RootReference;
             reference.Child("sala2").SetRawJsonValueAsync(json);
@@ -855,8 +831,6 @@ public class Object3dHistorico : MonoBehaviour
                     //acertou
                     Pilha.text = "acertaste agora faz a proposta";
                     modoadivinha = false;
-                    sala.proporjog1[sala.Ronda] = true;
-                    sala.proporjog2[sala.Ronda] = false;
                     PilhaMatriz.Clear();
                     resetobjeto();
                 }
@@ -877,8 +851,6 @@ public class Object3dHistorico : MonoBehaviour
                     //acertou
                     Pilha.text = "acertaste agora faz a proposta";
                     modoadivinha = false;
-                    sala.proporjog2[sala.Ronda] = true;
-                    sala.proporjog1[sala.Ronda] = false;
                     PilhaMatriz.Clear();
                     resetobjeto();
 

@@ -4,9 +4,11 @@ using Firebase;
 using Firebase.Auth;
 using TMPro;
 using UnityEngine.SceneManagement;
+using Firebase.Database;
 
 public class AuthManager : MonoBehaviour
 {
+
     //Firebase variables
     [Header("Firebase")]
     public DependencyStatus dependencyStatus;
@@ -198,9 +200,13 @@ public class AuthManager : MonoBehaviour
                         //Username is now set
                         //Now return to login screen
 
+                        //criar utilizador na base de dados
+                        Jog jogador = new Jog();
+                        string json = JsonUtility.ToJson(jogador);
+                        DatabaseReference reference = FirebaseDatabase.DefaultInstance.RootReference;
+                        reference.Child("jogadores").Child(Utilizador).SetRawJsonValueAsync(json);
+
                         SceneManager.LoadScene("IniciarSessao");
-
-
                         warningRegisterText.text = "";
                     }
                 }
@@ -208,3 +214,4 @@ public class AuthManager : MonoBehaviour
         }
     }
 }
+

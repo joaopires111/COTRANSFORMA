@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using Firebase.Database;
 using Firebase.Extensions;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class Object3d : MonoBehaviour
 {
@@ -29,7 +30,7 @@ public class Object3d : MonoBehaviour
 
 
 
-    private int indexbotao1, indexbotao2;
+    private int indexbotao1, indexbotao2, numrondas;
     private int[] posicaoBotaoPlay;
     private float angulo, angulodividido;
     private Vector3 axis;
@@ -64,6 +65,10 @@ public class Object3d : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
+        numrondas = 3;
+        CuboProposto.SetActive(false);
+
         indexbotao1 = -1;
         indexbotao2 = -1;
         nomebotao = "??";
@@ -195,16 +200,18 @@ public class Object3d : MonoBehaviour
                 readFirebaseSala();
                 countdown2 = 3.0f;
 
-                Debug.Log(Jog == "jog2" && sala.matrixjog1[sala.Ronda] != Matrix4x4.zero && sala.proporjog1[sala.Ronda]);
+                Debug.Log(Jog == "jog2" && sala.matrixjog1[sala.Ronda] != Matrix4x4.zero && sala.propor[sala.Ronda] == "jog1");
 
-                if (Jog == "jog2" && sala.matrixjog1[sala.Ronda] != Matrix4x4.zero && sala.proporjog1[sala.Ronda])
+                if (Jog == "jog2" && sala.matrixjog1[sala.Ronda] != Matrix4x4.zero && sala.propor[sala.Ronda] == "jog1")
                 {
+
                     aplicarTransformCuboProposto(sala.matrixjog1[sala.Ronda], sala.rotacaojog1[sala.Ronda], sala.escalajog1[sala.Ronda], sala.posjog1[sala.Ronda]);
                     esperar = false;
                 }
 
-                if (Jog == "jog1" && sala.matrixjog2[sala.Ronda] != Matrix4x4.zero && sala.proporjog2[sala.Ronda])
+                if (Jog == "jog1" && sala.matrixjog2[sala.Ronda] != Matrix4x4.zero && sala.propor[sala.Ronda] == "jog2")
                 {
+
                     aplicarTransformCuboProposto(sala.matrixjog2[sala.Ronda], sala.rotacaojog2[sala.Ronda], sala.escalajog1[sala.Ronda], sala.posjog1[sala.Ronda]);
                     esperar = false;
                 }
@@ -526,7 +533,7 @@ public class Object3d : MonoBehaviour
         //position2 = matriz.ExtractPosition();
         //scale2 = matriz.ExtractScale();
         //rotate2 = matriz.ExtractRotation();
-
+        CuboProposto.SetActive(true);
         CuboProposto.transform.localPosition = posjog;
         CuboProposto.transform.localScale = escalajog;
         CuboProposto.transform.localRotation = rotacaojog;
@@ -534,12 +541,12 @@ public class Object3d : MonoBehaviour
         Pilha.text = "Responda ao jogador1";
         activateButtons();
 
-        if (Jog == "jog2" && sala.proporjog1[sala.Ronda])
+        if (Jog == "jog2" && sala.propor[sala.Ronda] == "jog1")
         {
             modoadivinha = true;
             Pilha.text = "modoadivinha";
         }
-        if (Jog == "jog1" && sala.proporjog2[sala.Ronda])
+        if (Jog == "jog1" && sala.propor[sala.Ronda] == "jog2")
         {
             modoadivinha = true;
             Pilha.text = "modoadivinha";
@@ -807,7 +814,7 @@ public class Object3d : MonoBehaviour
 
     public void enviar()
     {
-
+        
         if (!modoadivinha)
         {
             deactivateButtons();
@@ -829,10 +836,7 @@ public class Object3d : MonoBehaviour
             }
 
 
-            if (sala.proporjog2[sala.Ronda])
-            {
-                sala.Ronda++;
-            }
+
             string json = JsonUtility.ToJson(sala);
             DatabaseReference reference = FirebaseDatabase.DefaultInstance.RootReference;
             reference.Child("sala2").SetRawJsonValueAsync(json);
@@ -847,19 +851,22 @@ public class Object3d : MonoBehaviour
             {
                 if (matrixfinal == sala.matrixjog2[sala.Ronda])
                 {
+
                     //acertou
                     Pilha.text = "acertaste agora faz a proposta";
                     modoadivinha = false;
-                    sala.proporjog1[sala.Ronda] = true;
-                    sala.proporjog2[sala.Ronda] = false;
+                    sala.propor[sala.Ronda] = "jog1";
                     PilhaMatriz.Clear();
+                    contador = 0;
                     resetobjeto();
+
                 }
                 else
                 {
                     //falhou
                     Pilha.text = "modo adivinha - falhaste";
                     PilhaMatriz.Clear();
+                    contador = 0;
                     resetobjeto();
 
 
@@ -869,13 +876,25 @@ public class Object3d : MonoBehaviour
             {
                 if (matrixfinal == sala.matrixjog1[sala.Ronda])
                 {
+                    //troca a ronda
+                    sala.Ronda++;
+                    
                     //acertou
                     Pilha.text = "acertaste agora faz a proposta";
                     modoadivinha = false;
-                    sala.proporjog2[sala.Ronda] = true;
-                    sala.proporjog1[sala.Ronda] = false;
+                    sala.propor[sala.Ronda] = "jog2";
                     PilhaMatriz.Clear();
+                    contador = 0;
                     resetobjeto();
+
+                    if (sala.Ronda == numrondas + 1)
+                    {
+                        //end
+                        SceneManager.LoadScene("ecrafinal");
+
+                    }
+
+
 
 
                 }
@@ -884,6 +903,7 @@ public class Object3d : MonoBehaviour
                     //falhou
                     Pilha.text = "modo adivinha - falhaste";
                     PilhaMatriz.Clear();
+                    contador = 0;
                     resetobjeto();
 
                 }
@@ -892,14 +912,15 @@ public class Object3d : MonoBehaviour
         resetmatriz();
     }
 
-    public void writeFirebase()
+    /* public void writeFirebase()
     {
         MatrixFirebase DBfire = new MatrixFirebase(x1, y1, z1, w1, x2, y2, z2, w2, x3, y3, z3, w3, x4, y4, z4, w4);
         string json = JsonUtility.ToJson(DBfire);
         DatabaseReference reference = FirebaseDatabase.DefaultInstance.RootReference;
         reference.Child("matrix").SetRawJsonValueAsync(json);
-    }
-    public void readFirebase()
+    }*/
+
+    /* public void readFirebase()
     {
         DatabaseReference reference = FirebaseDatabase.DefaultInstance.RootReference;
         FirebaseDatabase.DefaultInstance
@@ -936,6 +957,8 @@ public class Object3d : MonoBehaviour
             }
         });
     }
+    */
+
 
     public void readFirebaseSala()
     {
@@ -957,7 +980,6 @@ public class Object3d : MonoBehaviour
             }
         });
     }
-
 
 }
 
